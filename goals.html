@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goals - Wacky Workout Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-left">
+        <span class="flame-icon">🔥</span>
+        <h1 class="header-title">WACKY WORKOUT</h1>
+        <span class="flame-icon">🔥</span>
+      </div>
+      <div class="header-right">
+        <div class="streak-badge">
+          <div class="streak-number" id="streakNumber">0</div>
+          <div class="streak-label">Day Streak 🔥</div>
+        </div>
+        <button class="btn-logout" id="logoutBtn">
+          <span>↩️</span>
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <nav class="nav-tabs">
+      <a href="dashboard.html" class="nav-tab">
+        <span>📊</span>
+        Dashboard
+      </a>
+      <a href="logging.html" class="nav-tab">
+        <span>➕</span>
+        Log Workout
+      </a>
+      <a href="goals.html" class="nav-tab active">
+        <span>🎯</span>
+        Goals
+      </a>
+      <a href="progress.html" class="nav-tab">
+        <span>📈</span>
+        Progress
+      </a>
+    </nav>
+
+    <main>
+      <div class="card">
+        <h2 class="card-title">Create Goal</h2>
+        <form id="goalForm">
+          <div class="form-group">
+            <input type="text" id="goalName" placeholder="Goal name (e.g., 1000 Push-ups)" required>
+          </div>
+          <div class="form-group">
+            <input type="number" id="goalTarget" placeholder="Target number" required min="1">
+          </div>
+          <div class="form-group">
+            <input type="date" id="goalDeadline" required>
+          </div>
+          <button type="submit" class="btn btn-primary">CREATE GOAL</button>
+        </form>
+      </div>
+      
+      <div class="card">
+        <h2 class="card-title">Your Goals</h2>
+        <div id="goalsList"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Check authentication
+    checkAuth();
+    
+    const streak = getStreak();
+    document.getElementById('streakNumber').textContent = streak;
+    
+    // Goal form submission
+    document.getElementById('goalForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('goalName').value;
+      const target = parseInt(document.getElementById('goalTarget').value);
+      const deadline = document.getElementById('goalDeadline').value;
+      
+      const goals = getGoals();
+      goals.push({
+        id: Date.now(),
+        name,
+        target,
+        deadline,
+        progress: 0,
+        completed: false
+      });
+      
+      localStorage.setItem('wackyGoals', JSON.stringify(goals));
+      notify('Goal Created! 🎯', `"${name}" goal has been set!`, 'goal');
+      
+      document.getElementById('goalForm').reset();
+      renderGoals();
+    });
+    
+    // Render goals
+    function renderGoals() {
+      const goals = getGoals();
+      const goalsList = document.getElementById('goalsList');
+      
+      if (goals.length === 0) {
+        goalsList.innerHTML = '<p class="empty-state">No goals yet!</p>';
+      } else {
+        goalsList.innerHTML = goals.map(goal => {
+          const percentage = Math.min((goal.progress / goal.target) * 100, 100);
+          const completedClass = goal.completed ? 'goal-completed' : '';
+          
+          return `
+            <div class="goal-item ${completedClass}">
+              <div class="goal-header">
+                <div>
+                  <p class="goal-name">
+                    ${goal.completed ? '✅ ' : ''}${goal.name}
+                    ${goal.completed ? ' (Completed!)' : ''}
+                  </p>
+                  <p class="goal-deadline">Deadline: ${goal.deadline}</p>
+                </div>
+                <p class="goal-progress">${goal.progress}/${goal.target}</p>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill ${goal.completed ? 'progress-complete' : ''}" style="width: ${percentage}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+    
+    // Initial render
+    renderGoals();
+  </script>
+</body>
+</html>
