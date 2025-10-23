@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progress - Wacky Workout Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-left">
+        <span class="flame-icon">🔥</span>
+        <h1 class="header-title">WACKY WORKOUT</h1>
+        <span class="flame-icon">🔥</span>
+      </div>
+      <div class="header-right">
+        <div class="streak-badge">
+          <div class="streak-number" id="streakNumber">0</div>
+          <div class="streak-label">Day Streak 🔥</div>
+        </div>
+        <button class="btn-logout" id="logoutBtn">
+          <span>↩️</span>
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <nav class="nav-tabs">
+      <a href="dashboard.html" class="nav-tab">
+        <span>📊</span>
+        Dashboard
+      </a>
+      <a href="logging.html" class="nav-tab">
+        <span>➕</span>
+        Log Workout
+      </a>
+      <a href="goals.html" class="nav-tab">
+        <span>🎯</span>
+        Goals
+      </a>
+      <a href="progress.html" class="nav-tab active">
+        <span>📈</span>
+        Progress
+      </a>
+    </nav>
+
+    <main>
+      <div class="card">
+        <h2 class="card-title">Progress Overview</h2>
+        <div id="progressContent"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Check authentication
+    checkAuth();
+    
+    const streak = getStreak();
+    document.getElementById('streakNumber').textContent = streak;
+    
+    const workouts = getWorkouts();
+    const progressContent = document.getElementById('progressContent');
+    
+    if (workouts.length === 0) {
+      progressContent.innerHTML = '<p class="empty-state">Log workouts to see your progress!</p>';
+    } else {
+      // Group workouts by date
+      const workoutsByDate = {};
+      workouts.forEach(w => {
+        if (!workoutsByDate[w.date]) {
+          workoutsByDate[w.date] = [];
+        }
+        workoutsByDate[w.date].push(w);
+      });
+      
+      // Calculate daily totals
+      const dailyData = Object.keys(workoutsByDate).sort().slice(-7).map(date => {
+        const dayWorkouts = workoutsByDate[date];
+        return {
+          date,
+          workouts: dayWorkouts.length,
+          weight: dayWorkouts.reduce((sum, w) => sum + w.weight, 0),
+          duration: dayWorkouts.reduce((sum, w) => sum + w.duration, 0),
+          reps: dayWorkouts.reduce((sum, w) => sum + (w.sets * w.reps), 0)
+        };
+      });
+      
+      // Create summary
+      let html = '<div class="progress-summary">';
+      html += '<h3 class="chart-title">Last 7 Days Summary</h3>';
+      html += '<div class="progress-grid">';
+      
+      dailyData.forEach(day => {
+        html += `
+          <div class="progress-day-card">
+            <div class="progress-date">${day.date}</div>
+            <div class="progress-stat">
+              <span class="progress-label">Workouts:</span>
+              <span class="progress-value">${day.workouts}</span>
+            </div>
+            <div class="progress-stat">
+              <span class="progress-label">Total Reps:</span>
+              <span class="progress-value">${day.reps}</span>
+            </div>
+            <div class="progress-stat">
+              <span class="progress-label">Weight:</span>
+              <span class="progress-value">${day.weight} lbs</span>
+            </div>
+            <div class="progress-stat">
+              <span class="progress-label">Duration:</span>
+              <span class="progress-value">${day.duration} min</span>
+            </div>
+          </div>
+        `;
+      });
+      
+      html += '</div></div>';
+      
+      // Add exercise breakdown
+      const exerciseCount = {};
+      workouts.forEach(w => {
+        exerciseCount[w.exercise] = (exerciseCount[w.exercise] || 0) + 1;
+      });
+      
+      const topExercises = Object.entries(exerciseCount)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+      
+      html += '<div class="exercise-breakdown">';
+      html += '<h3 class="chart-title">Top 5 Exercises</h3>';
+      html += '<div class="exercise-list">';
+      
+      topExercises.forEach(([exercise, count], index) => {
+        html += `
+          <div class="exercise-item">
+            <div class="exercise-rank">#${index + 1}</div>
+            <div class="exercise-info">
+              <div class="exercise-name">${exercise}</div>
+              <div class="exercise-count">${count} sessions</div>
+            </div>
+          </div>
+        `;
+      });
+      
+      html += '</div></div>';
+      
+      progressContent.innerHTML = html;
+    }
+  </script>
+</body>
+</html>
