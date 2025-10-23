@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Wacky Workout Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-left">
+        <span class="flame-icon">🔥</span>
+        <h1 class="header-title">WACKY WORKOUT</h1>
+        <span class="flame-icon">🔥</span>
+      </div>
+      <div class="header-right">
+        <div class="streak-badge">
+          <div class="streak-number" id="streakNumber">0</div>
+          <div class="streak-label">Day Streak 🔥</div>
+        </div>
+        <button class="btn-logout" id="logoutBtn">
+          <span>↩️</span>
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <nav class="nav-tabs">
+      <a href="dashboard.html" class="nav-tab active">
+        <span>📊</span>
+        Dashboard
+      </a>
+      <a href="logging.html" class="nav-tab">
+        <span>➕</span>
+        Log Workout
+      </a>
+      <a href="goals.html" class="nav-tab">
+        <span>🎯</span>
+        Goals
+      </a>
+      <a href="progress.html" class="nav-tab">
+        <span>📈</span>
+        Progress
+      </a>
+    </nav>
+
+    <main>
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="card card-light">
+        <h2 class="card-title card-title-dark">Recent Workouts</h2>
+        <div class="workout-list" id="workoutList"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Check authentication
+    checkAuth();
+    
+    // Load and display data
+    const workouts = getWorkouts();
+    const streak = getStreak();
+    document.getElementById('streakNumber').textContent = streak;
+    
+    // Calculate stats
+    const stats = {
+      total: workouts.length,
+      reps: workouts.reduce((sum, w) => sum + (w.sets * w.reps), 0),
+      weight: workouts.reduce((sum, w) => sum + w.weight, 0),
+      duration: workouts.reduce((sum, w) => sum + w.duration, 0)
+    };
+    
+    // Render stats
+    document.getElementById('statsGrid').innerHTML = `
+      <div class="stat-card">
+        <div class="stat-value">${stats.total}</div>
+        <div class="stat-label">Total Workouts</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${stats.reps}</div>
+        <div class="stat-label">Total Reps</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${stats.weight}</div>
+        <div class="stat-label">Total Weight (lbs)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${stats.duration}</div>
+        <div class="stat-label">Minutes Trained</div>
+      </div>
+    `;
+    
+    // Render recent workouts
+    const workoutList = document.getElementById('workoutList');
+    if (workouts.length === 0) {
+      workoutList.innerHTML = '<p class="empty-state empty-state-dark">No workouts yet!</p>';
+    } else {
+      workoutList.innerHTML = workouts.slice().reverse().slice(0, 5).map(w => `
+        <div class="workout-item">
+          <div>
+            <p class="workout-name">${w.exercise}</p>
+            <p class="workout-details">${w.sets}×${w.reps} • ${w.duration}min • ${w.weight}lbs</p>
+          </div>
+          <div class="workout-actions">
+            <button class="icon-btn" onclick="editWorkout(${w.id})">✏️</button>
+            <button class="icon-btn" onclick="deleteWorkout(${w.id})">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function editWorkout(id) {
+      localStorage.setItem('editingWorkout', id);
+      window.location.href = 'logging.html';
+    }
+    
+    function deleteWorkout(id) {
+      let workouts = getWorkouts();
+      workouts = workouts.filter(w => w.id !== id);
+      localStorage.setItem('wackyWorkouts', JSON.stringify(workouts));
+      notify('Workout Deleted', 'Workout removed from your log', 'delete');
+      window.location.reload();
+    }
+  </script>
+</body>
+</html>
