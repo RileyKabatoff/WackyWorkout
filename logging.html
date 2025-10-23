@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log Workout - Wacky Workout Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-left">
+        <span class="flame-icon">🔥</span>
+        <h1 class="header-title">WACKY WORKOUT</h1>
+        <span class="flame-icon">🔥</span>
+      </div>
+      <div class="header-right">
+        <div class="streak-badge">
+          <div class="streak-number" id="streakNumber">0</div>
+          <div class="streak-label">Day Streak 🔥</div>
+        </div>
+        <button class="btn-logout" id="logoutBtn">
+          <span>↩️</span>
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <nav class="nav-tabs">
+      <a href="dashboard.html" class="nav-tab">
+        <span>📊</span>
+        Dashboard
+      </a>
+      <a href="logging.html" class="nav-tab active">
+        <span>➕</span>
+        Log Workout
+      </a>
+      <a href="goals.html" class="nav-tab">
+        <span>🎯</span>
+        Goals
+      </a>
+      <a href="progress.html" class="nav-tab">
+        <span>📈</span>
+        Progress
+      </a>
+    </nav>
+
+    <main>
+      <div class="card">
+        <h2 class="card-title" id="formTitle">Log Workout</h2>
+        <form id="workoutForm">
+          <div class="form-group">
+            <input type="text" id="exercise" placeholder="Exercise name" required>
+          </div>
+          <div class="form-row">
+            <input type="number" id="sets" placeholder="Sets" required min="1">
+            <input type="number" id="reps" placeholder="Reps" required min="1">
+          </div>
+          <div class="form-row">
+            <input type="number" id="duration" placeholder="Duration (min)" required min="1">
+            <input type="number" id="weight" placeholder="Weight (lbs)" required min="0">
+          </div>
+          <button type="submit" class="btn btn-primary" id="submitBtn">LOG WORKOUT</button>
+          <button type="button" class="btn btn-secondary hidden" id="cancelBtn">Cancel</button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Check authentication
+    checkAuth();
+    
+    const streak = getStreak();
+    document.getElementById('streakNumber').textContent = streak;
+    
+    let editingId = localStorage.getItem('editingWorkout');
+    
+    // If editing, populate form
+    if (editingId) {
+      editingId = parseInt(editingId);
+      const workouts = getWorkouts();
+      const workout = workouts.find(w => w.id === editingId);
+      
+      if (workout) {
+        document.getElementById('exercise').value = workout.exercise;
+        document.getElementById('sets').value = workout.sets;
+        document.getElementById('reps').value = workout.reps;
+        document.getElementById('duration').value = workout.duration;
+        document.getElementById('weight').value = workout.weight;
+        
+        document.getElementById('formTitle').textContent = 'Edit Workout';
+        document.getElementById('submitBtn').textContent = 'UPDATE WORKOUT';
+        document.getElementById('cancelBtn').classList.remove('hidden');
+      }
+    }
+    
+    // Form submission
+    document.getElementById('workoutForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const exercise = document.getElementById('exercise').value;
+      const sets = parseInt(document.getElementById('sets').value);
+      const reps = parseInt(document.getElementById('reps').value);
+      const duration = parseInt(document.getElementById('duration').value);
+      const weight = parseInt(document.getElementById('weight').value);
+      
+      let workouts = getWorkouts();
+      
+      if (editingId) {
+        workouts = workouts.map(w => w.id === editingId ? 
+          { ...w, exercise, sets, reps, duration, weight } : w
+        );
+        notify('Workout Updated! ✏️', `${exercise} has been updated!`, 'update');
+        localStorage.removeItem('editingWorkout');
+      } else {
+        workouts.push({
+          id: Date.now(),
+          exercise,
+          sets,
+          reps,
+          duration,
+          weight,
+          date: new Date().toISOString().split('T')[0],
+          timestamp: new Date().toISOString()
+        });
+        
+        notify('Workout Logged! 💪', `${exercise} has been added!`, 'workout');
+        
+        // Check and update goals
+        updateGoalsProgress(exercise, reps * sets, weight);
+      }
+      
+      localStorage.setItem('wackyWorkouts', JSON.stringify(workouts));
+      window.location.href = 'dashboard.html';
+    });
+    
+    // Cancel button
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+      localStorage.removeItem('editingWorkout');
+      window.location.href = 'dashboard.html';
+    });
+    
+    // Update goals based on workout
+    function updateGoalsProgress(exercise, totalReps, weight) {
+      let goals = getGoals();
+      let updated = false;
+      
+      goals = goals.map(goal => {
+        if (!goal.completed && goal.name.toLowerCase().includes(exercise.toLowerCase())) {
+          const newProgress = goal.progress + totalReps;
+          if (newProgress >= goal.target) {
+            notify('Goal Achieved! 🎉', `Congratulations! You completed "${goal.name}"!`, 'goal-complete');
+            return { ...goal, progress: goal.target, completed: true };
+          }
+          updated = true;
+          return { ...goal, progress: newProgress };
+        }
+        return goal;
+      });
+      
+      if (updated) {
+        localStorage.setItem('wackyGoals', JSON.stringify(goals));
+      }
+    }
+  </script>
+</body>
+</html>
