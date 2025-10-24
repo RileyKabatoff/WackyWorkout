@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Wacky Workout Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  
+  <div class="container">
+    <header class="header">
+      <div class="header-left">
+        <span class="flame-icon">🔥</span>
+        <h1 class="header-title">WACKY WORKOUT</h1>
+        <span class="flame-icon">🔥</span>
+      </div>
+      <div class="header-right">
+        <div class="streak-badge">
+          <div class="streak-number">7</div>
+          <div class="streak-label">Day Streak 🔥</div>
+        </div>
+        <a href="login.html" class="btn-logout" style="text-decoration: none;">
+          <span>↩️</span>
+          Logout
+        </a>
+      </div>
+    </header>
+
+    <nav class="nav-tabs">
+      <a href="dashboard.html" class="nav-tab active">
+        <span>📊</span>
+        Dashboard
+      </a>
+      <a href="logging.html" class="nav-tab">
+        <span>➕</span>
+        Log Workout
+      </a>
+      <a href="goals.html" class="nav-tab">
+        <span>🎯</span>
+        Goals
+      </a>
+      <a href="progress.html" class="nav-tab">
+        <span>📈</span>
+        Progress
+      </a>
+    </nav>
+
+    <main>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">12</div>
+          <div class="stat-label">Total Workouts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">840</div>
+          <div class="stat-label">Total Reps</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">1250</div>
+          <div class="stat-label">Total Weight (lbs)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">360</div>
+          <div class="stat-label">Minutes Trained</div>
+        </div>
+      </div>
+      <div class="card card-light">
+        <h2 class="card-title card-title-dark">Recent Workouts</h2>
+        <div class="workout-list">
+          <div class="workout-item">
+            <div>
+              <p class="workout-name">Push-ups</p>
+              <p class="workout-details">3×20 • 15min • 0lbs</p>
+            </div>
+            <div class="workout-actions">
+              <button class="icon-btn">✏️</button>
+              <button class="icon-btn">🗑️</button>
+            </div>
+          </div>
+          <div class="workout-item">
+            <div>
+              <p class="workout-name">Squats</p>
+              <p class="workout-details">4×15 • 20min • 135lbs</p>
+            </div>
+            <div class="workout-actions">
+              <button class="icon-btn">✏️</button>
+              <button class="icon-btn">🗑️</button>
+            </div>
+          </div>
+          <div class="workout-item">
+            <div>
+              <p class="workout-name">Bench Press</p>
+              <p class="workout-details">5×10 • 30min • 185lbs</p>
+            </div>
+            <div class="workout-actions">
+              <button class="icon-btn">✏️</button>
+              <button class="icon-btn">🗑️</button>
+            </div>
+          </div>
+          <div class="workout-item">
+            <div>
+              <p class="workout-name">Pull-ups</p>
+              <p class="workout-details">3×12 • 18min • 0lbs</p>
+            </div>
+            <div class="workout-actions">
+              <button class="icon-btn">✏️</button>
+              <button class="icon-btn">🗑️</button>
+            </div>
+          </div>
+          <div class="workout-item">
+            <div>
+              <p class="workout-name">Deadlift</p>
+              <p class="workout-details">4×8 • 25min • 225lbs</p>
+            </div>
+            <div class="workout-actions">
+              <button class="icon-btn">✏️</button>
+              <button class="icon-btn">🗑️</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+</body>
+</html>
