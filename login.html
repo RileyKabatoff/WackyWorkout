@@ -15,54 +15,18 @@
         <span class="flame-icon">🔥</span>
       </div>
       <p class="login-subtitle">Login to your account</p>
-      <form id="loginForm">
+      <form>
         <div class="form-group">
-          <input type="email" id="loginEmail" placeholder="Email" required>
+          <input type="email" placeholder="Email" value="demo@workout.com">
         </div>
         <div class="form-group">
-          <input type="password" id="loginPassword" placeholder="Password" required>
+          <input type="password" placeholder="Password" value="password">
         </div>
-        <button type="submit" class="btn btn-primary">LOGIN</button>
+        <a href="index.html" class="btn btn-primary" style="display: block; text-align: center; text-decoration: none;">LOGIN</a>
       </form>
-      <p class="demo-text">Demo: Use any email/password</p>
+      <!--this is html formatting. makes the text bold-->
+      <p class="demo-text"><b>Demo: Use any email/password</b></p>
     </div>
   </div>
-
-  <script>
-    document.getElementById('loginForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
-      
-      if (email && password) {
-        const user = { email, name: email.split('@')[0] };
-        localStorage.setItem('wackyUser', JSON.stringify(user));
-        
-        // Update streak on login
-        const today = new Date().toISOString().split('T')[0];
-        const lastLoginDate = localStorage.getItem('wackyLastLogin');
-        
-        if (lastLoginDate !== today) {
-          // New day login - increment streak
-          const currentStreak = parseInt(localStorage.getItem('wackyStreak') || '0');
-          localStorage.setItem('wackyStreak', currentStreak + 1);
-          localStorage.setItem('wackyLastLogin', today);
-        }
-        
-        if (Notification.permission === 'default') {
-          Notification.requestPermission();
-        }
-        
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification('Wacky Workout Tracker', {
-            body: `Welcome back, ${user.name}!`,
-            tag: 'login'
-          });
-        }
-        
-        window.location.href = 'dashboard.html';
-      }
-    });
-  </script>
 </body>
 </html>
