@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Progress - Wacky Workout Tracker</title>
+  <link rel="icon" href="Media/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -43,204 +44,206 @@
         <span>📈</span>
         Progress
       </a>
+      <a href="about.html" class="nav-tab">
+        <span>👤</span>
+        About
+      </a>
     </nav>
 
     <main>
+      <!-- Section 1: Weekly Performance Chart -->
+      <section class="card">
+        <h2 class="card-title">📊 Weekly Performance Analysis</h2>
+        <p class="analysis-description">This section will display a line graph showing your workout frequency, total reps, and weight lifted over the past 7 days. The Python matplotlib chart will be embedded here.</p>
+        <div class="chart-placeholder">
+          <p>[Python Chart: Weekly Performance Line Graph]</p>
+          <p>X-axis: Days of the week</p>
+          <p>Y-axis: Multiple metrics (workouts, reps, weight)</p>
+        </div>
+      </section>
+
+      <!-- Section 2: Exercise Distribution -->
+      <section class="card">
+        <h2 class="card-title">🥧 Exercise Distribution</h2>
+        <p class="analysis-description">A pie chart will show the percentage breakdown of different exercises you've performed. This helps identify which muscle groups you're focusing on.</p>
+        <div class="chart-placeholder">
+          <p>[Python Chart: Exercise Type Pie Chart]</p>
+          <p>Data: Percentage of each exercise type from database</p>
+        </div>
+      </section>
+
+      <!-- Section 3: Progress Over Time -->
+      <section class="card">
+        <h2 class="card-title">📈 Strength Progress Tracking</h2>
+        <p class="analysis-description">This bar chart will display your weight progression for each exercise over the past month, showing strength gains.</p>
+        <div class="chart-placeholder">
+          <p>[Python Chart: Weight Progress Bar Chart]</p>
+          <p>X-axis: Exercise names</p>
+          <p>Y-axis: Weight lifted (lbs)</p>
+        </div>
+      </section>
+
+      <!-- Section 4: Statistical Summary Table -->
+      <section class="card">
+        <h2 class="card-title">📋 Monthly Statistics</h2>
+        <p class="analysis-description">A comprehensive table analyzing your monthly performance with calculated statistics using pandas.</p>
+        
+        <!--TABLE element - Appropriate for displaying structured numerical data in rows and columns -->
+        <div class="table-placeholder">
+          <p>[Python-Generated Table: Monthly Summary]</p>
+          <table class="stats-table">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>This Month</th>
+                <th>Last Month</th>
+                <th>Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Total Workouts</td>
+                <td>24</td>
+                <td>20</td>
+                <td class="positive">+20%</td>
+              </tr>
+              <tr>
+                <td>Total Reps</td>
+                <td>2,450</td>
+                <td>2,100</td>
+                <td class="positive">+16.7%</td>
+              </tr>
+              <tr>
+                <td>Avg Weight Lifted</td>
+                <td>165 lbs</td>
+                <td>155 lbs</td>
+                <td class="positive">+6.5%</td>
+              </tr>
+              <tr>
+                <td>Training Time</td>
+                <td>840 min</td>
+                <td>720 min</td>
+                <td class="positive">+16.7%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 5: Correlation Analysis -->
+      <section class="card">
+        <h2 class="card-title">🔍 Performance Correlations</h2>
+        <p class="analysis-description">Python will analyze correlations between workout duration, sets, reps, and weight to identify patterns in your training.</p>
+        <div class="chart-placeholder">
+          <p>[Python Analysis: Correlation Heatmap]</p>
+          <p>Shows relationships between: duration, sets, reps, weight</p>
+        </div>
+      </section>
+
+      <!-- Section 6: Goal Achievement Forecast -->
+      <section class="card">
+        <h2 class="card-title">🎯 Goal Projection</h2>
+        <p class="analysis-description">Based on your current progress rate, this section will predict when you'll achieve your active goals using linear regression.</p>
+        <div class="chart-placeholder">
+          <p>[Python Chart: Goal Achievement Forecast]</p>
+          <p>Prediction model based on current workout frequency</p>
+        </div>
+      </section>
+
+      <!-- Section 7: Daily Breakdown -->
       <div class="card">
-        <h2 class="card-title">Progress Overview</h2>
-        <div>
-          <div class="progress-summary">
-            <h3 class="chart-title">Last 7 Days Summary</h3>
-            <div class="progress-grid">
-              <div class="progress-day-card">
-                <div class="progress-date">2025-10-17</div>
-                <div class="progress-stat">
-                  <span class="progress-label">Workouts:</span>
-                  <span class="progress-value">2</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Total Reps:</span>
-                  <span class="progress-value">120</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Weight:</span>
-                  <span class="progress-value">185 lbs</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Duration:</span>
-                  <span class="progress-value">45 min</span>
-                </div>
+        <h2 class="card-title">📅 Last 7 Days Summary</h2>
+        <div class="progress-summary">
+          <div class="progress-grid">
+            <div class="progress-day-card">
+              <div class="progress-date">2025-10-20</div>
+              <div class="progress-stat">
+                <span class="progress-label">Workouts:</span>
+                <span class="progress-value">2</span>
               </div>
-              
-              <div class="progress-day-card">
-                <div class="progress-date">2025-10-18</div>
-                <div class="progress-stat">
-                  <span class="progress-label">Workouts:</span>
-                  <span class="progress-value">1</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Total Reps:</span>
-                  <span class="progress-value">60</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Weight:</span>
-                  <span class="progress-value">135 lbs</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Duration:</span>
-                  <span class="progress-value">20 min</span>
-                </div>
+              <div class="progress-stat">
+                <span class="progress-label">Total Reps:</span>
+                <span class="progress-value">120</span>
               </div>
-              
-              <div class="progress-day-card">
-                <div class="progress-date">2025-10-19</div>
-                <div class="progress-stat">
-                  <span class="progress-label">Workouts:</span>
-                  <span class="progress-value">3</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Total Reps:</span>
-                  <span class="progress-value">180</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Weight:</span>
-                  <span class="progress-value">320 lbs</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Duration:</span>
-                  <span class="progress-value">65 min</span>
-                </div>
-              </div>
-              
-              <div class="progress-day-card">
-                <div class="progress-date">2025-10-20</div>
-                <div class="progress-stat">
-                  <span class="progress-label">Workouts:</span>
-                  <span class="progress-value">2</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Total Reps:</span>
-                  <span class="progress-value">100</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Weight:</span>
-                  <span class="progress-value">185 lbs</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Duration:</span>
-                  <span class="progress-value">38 min</span>
-                </div>
-              </div>
-              
-              <div class="progress-day-card">
-                <div class="progress-date">2025-10-21</div>
-                <div class="progress-stat">
-                  <span class="progress-label">Workouts:</span>
-                  <span class="progress-value">2</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Total Reps:</span>
-                  <span class="progress-value">140</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Weight:</span>
-                  <span class="progress-value">225 lbs</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Duration:</span>
-                  <span class="progress-value">50 min</span>
-                </div>
-              </div>
-              
-              <div class="progress-day-card">
-                <div class="progress-date">2025-10-22</div>
-                <div class="progress-stat">
-                  <span class="progress-label">Workouts:</span>
-                  <span class="progress-value">1</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Total Reps:</span>
-                  <span class="progress-value">80</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Weight:</span>
-                  <span class="progress-value">135 lbs</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Duration:</span>
-                  <span class="progress-value">30 min</span>
-                </div>
-              </div>
-              
-              <div class="progress-day-card">
-                <div class="progress-date">2025-10-23</div>
-                <div class="progress-stat">
-                  <span class="progress-label">Workouts:</span>
-                  <span class="progress-value">2</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Total Reps:</span>
-                  <span class="progress-value">160</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Weight:</span>
-                  <span class="progress-value">205 lbs</span>
-                </div>
-                <div class="progress-stat">
-                  <span class="progress-label">Duration:</span>
-                  <span class="progress-value">55 min</span>
-                </div>
+              <div class="progress-stat">
+                <span class="progress-label">Weight:</span>
+                <span class="progress-value">185 lbs</span>
               </div>
             </div>
-          </div>
-          
-          <div class="exercise-breakdown">
-            <h3 class="chart-title">Top 5 Exercises</h3>
-            <div class="exercise-list">
-              <div class="exercise-item">
-                <div class="exercise-rank">#1</div>
-                <div class="exercise-info">
-                  <div class="exercise-name">Push-ups</div>
-                  <div class="exercise-count">8 sessions</div>
-                </div>
+            
+            <div class="progress-day-card">
+              <div class="progress-date">2025-10-21</div>
+              <div class="progress-stat">
+                <span class="progress-label">Workouts:</span>
+                <span class="progress-value">1</span>
               </div>
-              
-              <div class="exercise-item">
-                <div class="exercise-rank">#2</div>
-                <div class="exercise-info">
-                  <div class="exercise-name">Squats</div>
-                  <div class="exercise-count">6 sessions</div>
-                </div>
+              <div class="progress-stat">
+                <span class="progress-label">Total Reps:</span>
+                <span class="progress-value">60</span>
               </div>
-              
-              <div class="exercise-item">
-                <div class="exercise-rank">#3</div>
-                <div class="exercise-info">
-                  <div class="exercise-name">Bench Press</div>
-                  <div class="exercise-count">5 sessions</div>
-                </div>
+              <div class="progress-stat">
+                <span class="progress-label">Weight:</span>
+                <span class="progress-value">135 lbs</span>
               </div>
-              
-              <div class="exercise-item">
-                <div class="exercise-rank">#4</div>
-                <div class="exercise-info">
-                  <div class="exercise-name">Pull-ups</div>
-                  <div class="exercise-count">4 sessions</div>
-                </div>
+            </div>
+            
+            <div class="progress-day-card">
+              <div class="progress-date">2025-10-22</div>
+              <div class="progress-stat">
+                <span class="progress-label">Workouts:</span>
+                <span class="progress-value">3</span>
               </div>
-              
-              <div class="exercise-item">
-                <div class="exercise-rank">#5</div>
-                <div class="exercise-info">
-                  <div class="exercise-name">Deadlift</div>
-                  <div class="exercise-count">3 sessions</div>
-                </div>
+              <div class="progress-stat">
+                <span class="progress-label">Total Reps:</span>
+                <span class="progress-value">180</span>
+              </div>
+              <div class="progress-stat">
+                <span class="progress-label">Weight:</span>
+                <span class="progress-value">320 lbs</span>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Section 8: Top Exercises -->
+      <div class="card">
+        <h2 class="card-title">🏆 Top 5 Exercises</h2>
+        
+        <!--Ordered list (ol) - Appropriate for ranking exercises in order -->
+        <ol class="exercise-ranking">
+          <li>
+            <span class="exercise-name">Push-ups</span>
+            <span class="exercise-count">8 sessions</span>
+          </li>
+          <li>
+            <span class="exercise-name">Squats</span>
+            <span class="exercise-count">6 sessions</span>
+          </li>
+          <li>
+            <span class="exercise-name">Bench Press</span>
+            <span class="exercise-count">5 sessions</span>
+          </li>
+          <li>
+            <span class="exercise-name">Pull-ups</span>
+            <span class="exercise-count">4 sessions</span>
+          </li>
+          <li>
+            <span class="exercise-name">Deadlift</span>
+            <span class="exercise-count">3 sessions</span>
+          </li>
+        </ol>
+      </div>
     </main>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <h3>Contact Us</h3>
+        <p>Email: support@wackyworkout.com</p>
+        <p>Phone: (555) 123-4567</p>
+        <p>Address: 123 Fitness Street, Workout City, WC 12345</p>
+      </div>
+    </footer>
   </div>
 </body>
 </html>
