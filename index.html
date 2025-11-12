@@ -1,33 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!--Meta charset defines character encoding for the webpage -->
   <meta charset="UTF-8">
   
-  <!--Viewport meta tag ensures proper rendering on mobile devices by setting width to device width and initial zoom level -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!--Meta description helps search engines understand page content and appears in search results -->
   <meta name="description" content="Track your fitness journey with Wacky Workout Tracker. Log workouts, set goals, and monitor your progress with our easy-to-use fitness dashboard.">
   
-  <!--Meta keywords help search engines categorize the content of the page -->
   <meta name="keywords" content="workout tracker, fitness app, exercise log, fitness goals, workout dashboard, fitness progress">
   
-  <!--Author meta tag identifies the content creator for search engines -->
   <meta name="author" content="Wacky Workout Team">
   
-  <!--Browser tab title and icon -->
   <title>Dashboard - Wacky Workout Tracker</title>
   
-  <!--Favicon displays icon in browser tab -->
-  <link rel="icon" href="Media/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
   
-  <!--This is a RELATIVE URL - links to CSS file within the project folder structure -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   
-  <!--This is a BLOCK ELEMENT - div creates a block-level container that takes full width -->
   <div class="container">
     <header class="header">
       <div class="header-left">
@@ -36,19 +27,26 @@
         <span class="flame-icon">🔥</span>
       </div>
       <div class="header-right">
+        <!-- ADDITIONAL COMPONENT 2 - Theme Toggle Button
+             This button toggles between dark and light modes by adding/removing a CSS class
+             The toggleDarkMode() function uses classList.toggle() to switch the 'light-mode' class
+             This demonstrates dynamic styling changes across the entire page -->
+        <button onclick="toggleDarkMode()" class="btn-logout" style="margin-right: 1rem;">
+          <span>🌓</span>
+          Toggle Theme
+        </button>
+        
         <div class="streak-badge">
-          <div class="streak-number">7</div>
+          <div class="streak-number" id="streakNumber">7</div>
           <div class="streak-label">Day Streak 🔥</div>
         </div>
-        <!--NAVIGATION - Links to login page-->
-        <a href="login.html" class="btn-logout" style="text-decoration: none;">
+        <button class="btn-logout" id="logoutBtn">
           <span>↩️</span>
           Logout
-        </a>
+        </button>
       </div>
     </header>
 
-    <!--NAVIGATION - Nav element provides navigation links to all main pages of the site -->
     <nav class="nav-tabs">
       <a href="index.html" class="nav-tab active">
         <span>📊</span>
@@ -72,84 +70,59 @@
       </a>
     </nav>
 
-    <!--SCHEMATIC STRUCTURE ELEMENT - main defines the primary content of the page -->
     <main>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value">12</div>
-          <div class="stat-label">Total Workouts</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">840</div>
-          <div class="stat-label">Total Reps</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">1250</div>
-          <div class="stat-label">Total Weight (lbs)</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">360</div>
-          <div class="stat-label">Minutes Trained</div>
-        </div>
+      <div class="stats-grid" id="statsGrid">
+        <!-- Stats will be populated by JavaScript -->
       </div>
       <div class="card card-light">
         <h2 class="card-title card-title-dark">Recent Workouts</h2>
-        <div class="workout-list">
-          <div class="workout-item">
-            <div>
-              <p class="workout-name">Push-ups</p>
-              <p class="workout-details">3×20 • 15min • 0lbs</p>
-            </div>
-            <div class="workout-actions">
-              <button class="icon-btn">✏️</button>
-              <button class="icon-btn">🗑️</button>
-            </div>
-          </div>
-          <div class="workout-item">
-            <div>
-              <p class="workout-name">Squats</p>
-              <p class="workout-details">4×15 • 20min • 135lbs</p>
-            </div>
-            <div class="workout-actions">
-              <button class="icon-btn">✏️</button>
-              <button class="icon-btn">🗑️</button>
-            </div>
-          </div>
-          <div class="workout-item">
-            <div>
-              <p class="workout-name">Bench Press</p>
-              <p class="workout-details">5×10 • 30min • 185lbs</p>
-            </div>
-            <div class="workout-actions">
-              <button class="icon-btn">✏️</button>
-              <button class="icon-btn">🗑️</button>
-            </div>
-          </div>
-          <div class="workout-item">
-            <div>
-              <p class="workout-name">Pull-ups</p>
-              <p class="workout-details">3×12 • 18min • 0lbs</p>
-            </div>
-            <div class="workout-actions">
-              <button class="icon-btn">✏️</button>
-              <button class="icon-btn">🗑️</button>
-            </div>
-          </div>
-          <div class="workout-item">
-            <div>
-              <p class="workout-name">Deadlift</p>
-              <p class="workout-details">4×8 • 25min • 225lbs</p>
-            </div>
-            <div class="workout-actions">
-              <button class="icon-btn">✏️</button>
-              <button class="icon-btn">🗑️</button>
+        
+        <!-- ADDITIONAL COMPONENT 1 - Search/Filter Functionality
+             This input field allows users to filter the workout list in real-time as they type
+             The oninput event triggers the filterWorkouts() function which shows/hides workout items
+             based on whether their exercise name matches the search term -->
+        <div style="margin-bottom: 1rem;">
+          <input type="text" 
+                 id="workoutSearch" 
+                 placeholder="🔍 Search workouts by exercise name..." 
+                 oninput="filterWorkouts(this.value)"
+                 style="width: 100%; padding: 0.75rem; border: 2px solid #d1d5db; border-radius: 0.5rem; background: white; color: #000;">
+        </div>
+        
+        <div class="workout-list" id="workoutList">
+          <!-- Workouts will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Secret Section with Password Access -->
+      <div class="card">
+        <h2 class="card-title">🔒 Secret Advanced Statistics</h2>
+        <p style="color: #fca5a5; margin-bottom: 1rem;">Enter password to access advanced analytics:</p>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+          <input type="password" id="secretPasswordInput" placeholder="Enter password" style="flex: 1;">
+          <button onclick="checkSecretPassword()" class="btn btn-primary" style="width: auto; padding: 0.75rem 1.5rem;">Unlock</button>
+        </div>
+        <p id="passwordError" style="color: #ef4444; display: none; margin-bottom: 1rem;"></p>
+        
+        <!-- CHANGE FORMATTING - This section is hidden by default (display: none) and becomes visible when correct password is entered
+             The checkSecretPassword() function toggles the display property from 'none' to 'block', making the content appear
+             This demonstrates dynamic formatting changes based on user interaction -->
+        <div id="secretSection" style="display: none;">
+          <h3 style="color: #34d399; margin-bottom: 1rem;">✓ Access Granted - Advanced Statistics</h3>
+          <div style="background: rgba(127, 29, 29, 0.3); padding: 1.5rem; border-radius: 0.5rem; border: 2px solid #34d399;">
+            <p style="color: #fca5a5; margin-bottom: 1rem;">🔬 Advanced Analytics Dashboard</p>
+            <div style="color: white;">
+              <p><strong>🎯 Success Rate:</strong> 94.5%</p>
+              <p><strong>📊 Average Improvement:</strong> +12.3% per week</p>
+              <p><strong>🏆 Predicted Goal Achievement:</strong> 2 weeks ahead of schedule</p>
+              <p><strong>💪 Power User Status:</strong> Top 5% of all users</p>
+              <p style="margin-top: 1rem; color: #34d399;"><em>You're Doing Great</em></p>
             </div>
           </div>
         </div>
       </div>
     </main>
 
-    <!--Footer provides contact information for the site -->
     <footer class="footer">
       <div class="footer-content">
         <h3>Contact Us</h3>
@@ -160,5 +133,70 @@
     </footer>
   </div>
 
+  <script src="app.js"></script>
+  <script>
+    
+    const workouts = getWorkouts();
+    const streak = getStreak();
+    
+    // DOM SELECTION - HTML ELEMENT TYPE: <div> with id="streakNumber"
+    // HOW IT LINKS: document.getElementById() selects the element by its unique id attribute
+    // This method returns a single element reference that matches the id in the HTML
+    // The id="streakNumber" in the HTML <div> is targeted by 'streakNumber' parameter
+    document.getElementById('streakNumber').textContent = streak;
+    
+    
+    const stats = calculateStats(workouts);
+    
+    document.getElementById('statsGrid').innerHTML = `
+      <div class="stat-card">
+        <div class="stat-value">${stats.total}</div>
+        <div class="stat-label">Total Workouts</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${stats.reps}</div>
+        <div class="stat-label">Total Reps</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${stats.weight}</div>
+        <div class="stat-label">Total Weight (lbs)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${stats.duration}</div>
+        <div class="stat-label">Minutes Trained</div>
+      </div>
+    `;
+    
+    
+    const workoutList = document.getElementById('workoutList');
+    if (workouts.length === 0) {
+      workoutList.innerHTML = '<p class="empty-state empty-state-dark">No workouts yet!</p>';
+    } else {
+      workoutList.innerHTML = workouts.slice().reverse().slice(0, 5).map(w => `
+        <div class="workout-item">
+          <div>
+            <p class="workout-name">${w.exercise}</p>
+            <p class="workout-details">${w.sets}×${w.reps} • ${w.duration}min • ${w.weight}lbs</p>
+          </div>
+          <div class="workout-actions">
+            <button class="icon-btn" onclick="editWorkout(${w.id})">✏️</button>
+            <button class="icon-btn" onclick="deleteWorkout(${w.id})">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function editWorkout(id) {
+      alert('Edit functionality will be implemented with SQL/Python backend');
+      // Future: Redirect to logging page with workout data
+    }
+    
+    function deleteWorkout(id) {
+      if (confirm('Delete functionality will be implemented with SQL/Python backend. Proceed?')) {
+        alert('This will delete workout ID: ' + id);
+        // Future: Send delete request to backend
+      }
+    }
+  </script>
 </body>
 </html>
