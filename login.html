@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Wacky Workout Tracker</title>
-  <link rel="icon" href="media/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -16,18 +16,53 @@
         <span class="flame-icon">🔥</span>
       </div>
       <p class="login-subtitle">Login to your account</p>
-      <form>
+      <form id="loginForm">
         <div class="form-group">
-          <input type="email" placeholder="Email" value="demo@workout.com">
+          <input type="email" id="loginEmail" placeholder="Email" value="demo@workout.com" required>
         </div>
         <div class="form-group">
-          <input type="password" placeholder="Password" value="password">
+          <input type="password" id="loginPassword" placeholder="Password" value="password" required>
         </div>
-        <a href="index.html" class="btn btn-primary" style="display: block; text-align: center; text-decoration: none;">LOGIN</a>
+        <button type="submit" class="btn btn-primary">LOGIN</button>
       </form>
-      <!--b tag makes "Demo: Use any email/password" text bold -->
+      
       <p class="demo-text"><b>Demo: Use any email/password</b></p>
     </div>
   </div>
+
+  <script src="app.js"></script>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      
+      // FORM VALIDATION - This code validates that the email input matches proper email format
+      // The validateEmail() function uses a regular expression to check for: username@domain.extension
+      // If validation fails, an alert is shown and the form does not submit
+      if (!validateEmail(email)) {
+        alert('Please enter a valid email address (e.g., user@example.com)');
+        return;
+      }
+      
+      if (email && password) {
+        if (Notification.permission === 'default') {
+          Notification.requestPermission();
+        }
+  
+        if ('Notification' in window && Notification.permission === 'granted') {
+          const userName = email.split('@')[0];
+          new Notification('Wacky Workout Tracker', {
+            body: `Welcome back, ${userName}!`,
+            tag: 'login'
+          });
+        }
+
+        window.location.href = 'index.html';
+      } else {
+        alert('Please enter both email and password');
+      }
+    });
+  </script>
 </body>
 </html>
