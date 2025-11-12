@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Meet the team behind Wacky Workout Tracker and learn about our mission to help you achieve your fitness goals.">
   <title>About - Wacky Workout Tracker</title>
-  <link rel="icon" href="Media/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -18,13 +18,13 @@
       </div>
       <div class="header-right">
         <div class="streak-badge">
-          <div class="streak-number">7</div>
+          <div class="streak-number" id="streakNumber">7</div>
           <div class="streak-label">Day Streak 🔥</div>
         </div>
-        <a href="login.html" class="btn-logout" style="text-decoration: none;">
+        <button class="btn-logout" id="logoutBtn">
           <span>↩️</span>
           Logout
-        </a>
+        </button>
       </div>
     </header>
 
@@ -52,13 +52,13 @@
     </nav>
 
     <main>
-      <!-- Section element groups related content together -->
+      
       <section class="card">
         <h2 class="card-title">About Wacky Workout</h2>
         
         <div class="about-creator">
-          <!-- IMAGE ELEMENT with src (source), alt (accessibility), width, and height attributes -->
-          <img src="Media/20251023_170736.jpg" alt="its patrick and I" width="200" height="200" class="creator-image">
+          
+          <img src="media/20251023_170736.jpg" alt="its patrick and I" width="200" height="200" class="creator-image">
           
           <div class="creator-info">
             <h3>Meet the Creators</h3>
@@ -71,7 +71,7 @@
       <section class="card">
         <h2 class="card-title">Frequently Asked Questions</h2>
         
-        <!-- dl (description list) is appropriate for FAQ format with terms and definitions -->
+        
         <dl class="faq-list">
           <dt class="faq-question">What is Wacky Workout Tracker?</dt>
           <dd class="faq-answer">Wacky Workout Tracker is a simple, user-friendly fitness application that helps you log workouts, set goals, and track your progress over time. It's designed to be fun and motivating without overwhelming you with unnecessary features.</dd>
@@ -99,7 +99,7 @@
         </dl>
       </section>
 
-      <!-- This is an ABSOLUTE URL - links to external resource outside the project -->
+      
       <section class="card">
         <h2 class="card-title">Resources</h2>
         <p>Want to learn more about fitness? Check out these helpful resources:</p>
@@ -119,5 +119,10 @@
       </div>
     </footer>
   </div>
+
+  <script src="app.js"></script>
+  <script>
+    document.getElementById('streakNumber').textContent = getStreak();
+  </script>
 </body>
 </html>
