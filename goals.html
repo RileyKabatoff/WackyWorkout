@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Goals - Wacky Workout Tracker</title>
-  <link rel="icon" href="Media/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -17,13 +17,13 @@
       </div>
       <div class="header-right">
         <div class="streak-badge">
-          <div class="streak-number">7</div>
+          <div class="streak-number" id="streakNumber">7</div>
           <div class="streak-label">Day Streak 🔥</div>
         </div>
-        <a href="login.html" class="btn-logout" style="text-decoration: none;">
+        <button class="btn-logout" id="logoutBtn">
           <span>↩️</span>
           Logout
-        </a>
+        </button>
       </div>
     </header>
 
@@ -53,61 +53,24 @@
     <main>
       <div class="card">
         <h2 class="card-title">Create Goal</h2>
-        <form>
+        <form id="goalForm">
           <div class="form-group">
-            <input type="text" placeholder="Goal name (e.g., 1000 Push-ups)">
+            <input type="text" id="goalName" placeholder="Goal name (e.g., 1000 Push-ups)" required>
           </div>
           <div class="form-group">
-            <input type="number" placeholder="Target number" min="1">
+            <input type="number" id="goalTarget" placeholder="Target number" required min="1">
           </div>
           <div class="form-group">
-            <input type="date">
+            <input type="date" id="goalDeadline" required>
           </div>
-          <button type="button" class="btn btn-primary">CREATE GOAL</button>
+          <button type="submit" class="btn btn-primary">CREATE GOAL</button>
         </form>
       </div>
       
       <div class="card">
         <h2 class="card-title">Your Goals</h2>
-        <div>
-          <div class="goal-item goal-completed">
-            <div class="goal-header">
-              <div>
-                <p class="goal-name">✅ 1000 Push-ups (Completed!)</p>
-                <p class="goal-deadline">Deadline: 2025-10-15</p>
-              </div>
-              <p class="goal-progress">1000/1000</p>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill progress-complete" style="width: 100%"></div>
-            </div>
-          </div>
+        <div id="goalsList">
           
-          <div class="goal-item">
-            <div class="goal-header">
-              <div>
-                <p class="goal-name">500 Squats</p>
-                <p class="goal-deadline">Deadline: 2025-11-01</p>
-              </div>
-              <p class="goal-progress">350/500</p>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: 70%"></div>
-            </div>
-          </div>
-          
-          <div class="goal-item">
-            <div class="goal-header">
-              <div>
-                <p class="goal-name">100 Pull-ups</p>
-                <p class="goal-deadline">Deadline: 2025-10-30</p>
-              </div>
-              <p class="goal-progress">45/100</p>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: 45%"></div>
-            </div>
-          </div>
         </div>
       </div>
     </main>
@@ -121,5 +84,70 @@
       </div>
     </footer>
   </div>
+
+  <script src="app.js"></script>
+  <script>
+    
+    document.getElementById('streakNumber').textContent = getStreak();
+    
+    
+    document.getElementById('goalForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const goalData = {
+        name: document.getElementById('goalName').value,
+        target: parseInt(document.getElementById('goalTarget').value),
+        deadline: document.getElementById('goalDeadline').value
+      };
+      
+      console.log('Goal data to be sent to backend:', goalData);
+      
+      notify('Goal Created! 🎯', `"${goalData.name}" goal has been set!`, 'goal');
+      
+      alert(`Goal created successfully!\n\nThis data will be sent to your SQL/Python backend:\n\nGoal: ${goalData.name}\nTarget: ${goalData.target}\nDeadline: ${goalData.deadline}`);
+      
+      
+      document.getElementById('goalForm').reset();
+      
+      
+      renderGoals();
+    });
+    
+    
+    function renderGoals() {
+      const goals = getGoals();
+      const goalsList = document.getElementById('goalsList');
+      
+      if (goals.length === 0) {
+        goalsList.innerHTML = '<p class="empty-state">No goals yet!</p>';
+      } else {
+        goalsList.innerHTML = goals.map(goal => {
+          const percentage = Math.min((goal.progress / goal.target) * 100, 100);
+          const completedClass = goal.completed ? 'goal-completed' : '';
+          
+          return `
+            <div class="goal-item ${completedClass}">
+              <div class="goal-header">
+                <div>
+                  <p class="goal-name">
+                    ${goal.completed ? '✅ ' : ''}${goal.name}
+                    ${goal.completed ? ' (Completed!)' : ''}
+                  </p>
+                  <p class="goal-deadline">Deadline: ${goal.deadline}</p>
+                </div>
+                <p class="goal-progress">${goal.progress}/${goal.target}</p>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill ${goal.completed ? 'progress-complete' : ''}" style="width: ${percentage}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+    
+    
+    renderGoals();
+  </script>
 </body>
 </html>
