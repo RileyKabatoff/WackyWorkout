@@ -1,6 +1,3 @@
-
-
-
 // STATIC DATA (will be replaced with SQL/Python backend)
 
 
@@ -89,6 +86,17 @@ let secretAccessGranted = false;
 
 // Secret password for accessing hidden section
 const SECRET_PASSWORD = "WACKY2025";
+
+
+// THEME MANAGEMENT - Load saved theme on page load
+// This code runs immediately when the script loads to apply the saved theme preference
+// Uses sessionStorage to persist theme choice across page navigation (but not after closing browser)
+(function() {
+  const savedTheme = sessionStorage.getItem('wackyWorkoutTheme');
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-mode');
+  }
+})();
 
 
 // Logout functionality
@@ -231,10 +239,19 @@ function toggleElement(elementId) {
   }
 }
 
-// CHANGE FORMATTING - Change theme/appearance
+// CHANGE FORMATTING - Change theme/appearance with sessionStorage persistence
+// This version saves the theme preference only for the current session
+// sessionStorage stores the theme choice ('light' or 'dark') until the browser is closed
 function toggleDarkMode() {
   const body = document.body;
   body.classList.toggle('light-mode');
+  
+  // Save theme preference to sessionStorage (only lasts for current session)
+  if (body.classList.contains('light-mode')) {
+    sessionStorage.setItem('wackyWorkoutTheme', 'light');
+  } else {
+    sessionStorage.setItem('wackyWorkoutTheme', 'dark');
+  }
 }
 
 // CHANGE HTML CONTENT - Updates text content of an element
