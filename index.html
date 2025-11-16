@@ -72,7 +72,6 @@
 
     <main>
       <div class="stats-grid" id="statsGrid">
-        <!-- Stats will be populated by JavaScript -->
       </div>
       <div class="card card-light">
         <h2 class="card-title card-title-dark">Recent Workouts</h2>
@@ -133,70 +132,110 @@
     </footer>
   </div>
 
-  <script src="app.js"></script>
-  <script>
-    
-    const workouts = getWorkouts();
-    const streak = getStreak();
-    
-    // DOM SELECTION - HTML ELEMENT TYPE: <div> with id="streakNumber"
-    // HOW IT LINKS: document.getElementById() selects the element by its unique id attribute
-    // This method returns a single element reference that matches the id in the HTML
-    // The id="streakNumber" in the HTML <div> is targeted by 'streakNumber' parameter
-    document.getElementById('streakNumber').textContent = streak;
-    
-    
-    const stats = calculateStats(workouts);
-    
-    document.getElementById('statsGrid').innerHTML = `
-      <div class="stat-card">
-        <div class="stat-value">${stats.total}</div>
-        <div class="stat-label">Total Workouts</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">${stats.reps}</div>
-        <div class="stat-label">Total Reps</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">${stats.weight}</div>
-        <div class="stat-label">Total Weight (lbs)</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">${stats.duration}</div>
-        <div class="stat-label">Minutes Trained</div>
-      </div>
-    `;
-    
-    
-    const workoutList = document.getElementById('workoutList');
-    if (workouts.length === 0) {
-      workoutList.innerHTML = '<p class="empty-state empty-state-dark">No workouts yet!</p>';
-    } else {
-      workoutList.innerHTML = workouts.slice().reverse().slice(0, 5).map(w => `
-        <div class="workout-item">
-          <div>
-            <p class="workout-name">${w.exercise}</p>
-            <p class="workout-details">${w.sets}×${w.reps} • ${w.duration}min • ${w.weight}lbs</p>
-          </div>
-          <div class="workout-actions">
-            <button class="icon-btn" onclick="editWorkout(${w.id})">✏️</button>
-            <button class="icon-btn" onclick="deleteWorkout(${w.id})">🗑️</button>
-          </div>
+<script src="app.js"></script>
+<script>
+  // Check authentication
+  const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+  if (!currentUser) {
+    window.location.href = 'login.html';
+  }
+  
+  // Initialize page with async function
+  async function initDashboard() {
+    try {
+      // Update streak display
+      getStreak().then(streak => {
+        document.getElementById('streakNumber').textContent = streak;
+      });
+      
+      // Fetch and display stats
+      const stats = await calculateStats();
+      
+      document.getElementById('statsGrid').innerHTML = `
+        <div class="stat-card">
+          <div class="stat-value">${stats.total}</div>
+          <div class="stat-label">Total Workouts</div>
         </div>
-      `).join('');
-    }
-    
-    function editWorkout(id) {
-      alert('Edit functionality will be implemented with SQL/Python backend');
-      // Future: Redirect to logging page with workout data
-    }
-    
-    function deleteWorkout(id) {
-      if (confirm('Delete functionality will be implemented with SQL/Python backend. Proceed?')) {
-        alert('This will delete workout ID: ' + id);
-        // Future: Send delete request to backend
+        <div class="stat-card">
+          <div class="stat-value">${stats.reps}</div>
+          <div class="stat-label">Total Reps</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${Math.round(stats.weight)}</div>
+          <div class="stat-label">Total Weight (lbs)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.duration}</div>
+          <div class="stat-label">Minutes Trained</div>
+        </div>
+      `;
+      
+      // Fetch and display recent workouts
+      const workouts = await getWorkouts();
+      const workoutList = document.getElementById('workoutList');
+      
+      if (workouts.length === 0) {
+        workoutList.innerHTML = '<p class="empty-state empty-state-dark">No workouts yet! Log your first workout.</p>';
+      } else {
+        // Display most recent 5 workouts
+        const recentWorkouts = workouts.slice(0, 5);
+        workoutList.innerHTML = recentWorkouts.map(w => `
+          <div class="workout-item">
+            <div>
+              <p class="workout-name">${w.exercise_name}</p>
+              <p class="workout-details">${w.sets}×${w.reps} • ${w.duration}min • ${w.weight}lbs</p>
+            </div>
+            <div class="workout-actions">
+              <button class="icon-btn" onclick="editWorkout(${w.workout_id})">✏️</button>
+              <button class="icon-btn" onclick="deleteWorkout(${w.workout_id})">🗑️</button>
+            </div>
+          </div>
+        `).join('');
       }
+      
+    } catch (error) {
+      console.error('Error initializing dashboard:', error);
+      alert('Error loading dashboard data');
     }
-  </script>
+  }
+  
+  // Edit workout function
+  function editWorkout(id) {
+    alert('Edit functionality - To be implemented in future update');
+    // Future: Could redirect to editing page or open modal
+  }
+  
+  // Delete workout function
+  async function deleteWorkout(id) {
+    if (!confirm('Are you sure you want to delete this workout?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`http://localhost:3000/api/workouts/${id}`, {
+        method: 'DELETE'
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        alert(result.error || 'Failed to delete workout');
+        return;
+      }
+      
+      alert('Workout deleted successfully!');
+      
+      // Reload dashboard
+      initDashboard();
+      
+    } catch (error) {
+      console.error('Error deleting workout:', error);
+      alert('An error occurred while deleting the workout');
+    }
+  }
+  
+  // Initialize dashboard on page load
+  initDashboard();
+</script>
 </body>
 </html>

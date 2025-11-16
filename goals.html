@@ -90,68 +90,148 @@
   </div>
 
   <script src="app.js"></script>
-  <script>
+<script>
+  // Check authentication
+  const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+  if (!currentUser) {
+    window.location.href = 'login.html';
+  }
+  
+  // Update streak display
+  getStreak().then(streak => {
+    document.getElementById('streakNumber').textContent = streak;
+  });
+  
+  // Handle goal form submission
+  document.getElementById('goalForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
     
-    document.getElementById('streakNumber').textContent = getStreak();
+    const goalData = {
+      userId: currentUser.userId,
+      goalName: document.getElementById('goalName').value,
+      targetValue: parseInt(document.getElementById('goalTarget').value),
+      deadline: document.getElementById('goalDeadline').value || null
+    };
     
-    
-    document.getElementById('goalForm').addEventListener('submit', (e) => {
-      e.preventDefault();
+    try {
+      const response = await fetch('http://localhost:3000/api/goals', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(goalData)
+      });
       
-      const goalData = {
-        name: document.getElementById('goalName').value,
-        target: parseInt(document.getElementById('goalTarget').value),
-        deadline: document.getElementById('goalDeadline').value
-      };
+      const result = await response.json();
       
-      console.log('Goal data to be sent to backend:', goalData);
+      if (!response.ok) {
+        alert(result.error || 'Failed to create goal');
+        return;
+      }
       
-      notify('Goal Created! 🎯', `"${goalData.name}" goal has been set!`, 'goal');
+      // Show notification
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Goal Created! 🎯', {
+          body: `"${goalData.goalName}" goal has been set!`,
+          tag: 'goal'
+        });
+      }
       
-      alert(`Goal created successfully!\n\nThis data will be sent to your SQL/Python backend:\n\nGoal: ${goalData.name}\nTarget: ${goalData.target}\nDeadline: ${goalData.deadline}`);
+      alert('Goal created successfully!');
       
-      
+      // Reset form
       document.getElementById('goalForm').reset();
       
-      
+      // Reload goals list
       renderGoals();
-    });
-    
-    
-    function renderGoals() {
-      const goals = getGoals();
+      
+    } catch (error) {
+      console.error('Error creating goal:', error);
+      alert('An error occurred. Please try again.');
+    }
+  });
+  
+  // Render goals function
+  async function renderGoals() {
+    try {
+      const goals = await getGoals();
       const goalsList = document.getElementById('goalsList');
       
       if (goals.length === 0) {
-        goalsList.innerHTML = '<p class="empty-state">No goals yet!</p>';
+        goalsList.innerHTML = '<p class="empty-state">No goals yet! Create your first goal above.</p>';
       } else {
         goalsList.innerHTML = goals.map(goal => {
-          const percentage = Math.min((goal.progress / goal.target) * 100, 100);
-          const completedClass = goal.completed ? 'goal-completed' : '';
+          const percentage = Math.min((goal.current_progress / goal.target_value) * 100, 100);
+          const completedClass = goal.is_completed ? 'goal-completed' : '';
           
           return `
             <div class="goal-item ${completedClass}">
               <div class="goal-header">
                 <div>
                   <p class="goal-name">
-                    ${goal.completed ? '✅ ' : ''}${goal.name}
-                    ${goal.completed ? ' (Completed!)' : ''}
+                    ${goal.is_completed ? '✅ ' : ''}${goal.goal_name}
+                    ${goal.is_completed ? ' (Completed!)' : ''}
                   </p>
-                  <p class="goal-deadline">Deadline: ${goal.deadline}</p>
+                  <p class="goal-deadline">
+                    ${goal.deadline ? 'Deadline: ' + goal.deadline : 'No deadline set'}
+                  </p>
                 </div>
-                <p class="goal-progress">${goal.progress}/${goal.target}</p>
+                <div>
+                  <p class="goal-progress">${goal.current_progress}/${goal.target_value}</p>
+                  ${!goal.is_completed ? `
+                    <button class="icon-btn" onclick="deleteGoal(${goal.goal_id})" 
+                            style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.875rem;">
+                      🗑️ Delete
+                    </button>
+                  ` : ''}
+                </div>
               </div>
               <div class="progress-bar">
-                <div class="progress-fill ${goal.completed ? 'progress-complete' : ''}" style="width: ${percentage}%"></div>
+                <div class="progress-fill ${goal.is_completed ? 'progress-complete' : ''}" 
+                     style="width: ${percentage}%"></div>
               </div>
             </div>
           `;
         }).join('');
       }
+    } catch (error) {
+      console.error('Error rendering goals:', error);
+      document.getElementById('goalsList').innerHTML = 
+        '<p class="empty-state">Error loading goals. Please refresh the page.</p>';
+    }
+  }
+  
+  // Delete goal function
+  async function deleteGoal(goalId) {
+    if (!confirm('Are you sure you want to delete this goal?')) {
+      return;
     }
     
-    
-    renderGoals();
-  </script>
+    try {
+      const response = await fetch(`http://localhost:3000/api/goals/${goalId}`, {
+        method: 'DELETE'
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        alert(result.error || 'Failed to delete goal');
+        return;
+      }
+      
+      alert('Goal deleted successfully!');
+      
+      // Reload goals list
+      renderGoals();
+      
+    } catch (error) {
+      console.error('Error deleting goal:', error);
+      alert('An error occurred while deleting the goal');
+    }
+  }
+  
+  // Initial render
+  renderGoals();
+</script>
 </body>
 </html>

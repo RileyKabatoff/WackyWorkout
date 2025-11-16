@@ -1,81 +1,44 @@
-// STATIC DATA (will be replaced with SQL/Python backend)
+// USER SESSION MANAGEMENT
+// Stores current logged-in user information in sessionStorage
+let currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || null;
 
-
-const staticWorkouts = [
-  {
-    id: 1,
-    exercise: 'Push-ups',
-    sets: 3,
-    reps: 20,
-    duration: 15,
-    weight: 0,
-    date: '2025-10-20',
-    difficulty: 'moderate'
-  },
-  {
-    id: 2,
-    exercise: 'Squats',
-    sets: 4,
-    reps: 15,
-    duration: 20,
-    weight: 135,
-    date: '2025-10-21'
-  },
-  {
-    id: 3,
-    exercise: 'Bench Press',
-    sets: 5,
-    reps: 10,
-    duration: 30,
-    weight: 185,
-    date: '2025-10-22'
-  },
-  {
-    id: 4,
-    exercise: 'Pull-ups',
-    sets: 3,
-    reps: 12,
-    duration: 18,
-    weight: 0,
-    date: '2025-10-22'
-  },
-  {
-    id: 5,
-    exercise: 'Deadlift',
-    sets: 4,
-    reps: 8,
-    duration: 25,
-    weight: 225,
-    date: '2025-10-23'
+// Helper function to check if user is logged in
+function requireAuth() {
+  if (!currentUser) {
+    alert('Please log in to access this page');
+    window.location.href = 'login.html';
+    return false;
   }
-];
+  return true;
+}
 
-const staticGoals = [
-  {
-    id: 1,
-    name: '1000 Push-ups',
-    target: 1000,
-    progress: 1000,
-    deadline: '2025-10-15',
-    completed: true
-  },
-  {
-    id: 2,
-    name: '500 Squats',
-    target: 500,
-    progress: 350,
-    deadline: '2025-11-01',
-    completed: false
-  },
-  {
-    id: 3,
-    name: '100 Pull-ups',
-    target: 100,
-    progress: 45,
-    deadline: '2025-10-30',
-    completed: false
+// Helper function to make API calls
+async function apiCall(endpoint, method = 'GET', data = null) {
+  const options = {
+    method: method,
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  };
+
+  if (data) {
+    options.body = JSON.stringify(data);
   }
-];
+
+  try {
+    const response = await fetch(`http://localhost:3000${endpoint}`, options);
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'API request failed');
+    }
+
+    return result;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
+}
 
 
 // VARIABLE EXAMPLE - let keyword declares a block-scoped variable that CAN be changed/reassigned
@@ -110,6 +73,10 @@ document.addEventListener('DOMContentLoaded', () => {
     logoutBtn.addEventListener('click', (e) => {
       e.preventDefault();
       if (confirm('Are you sure you want to logout?')) {
+        // Clear session storage
+        sessionStorage.removeItem('currentUser');
+        
+        // Redirect to login page
         window.location.href = 'login.html';
       }
     });
@@ -119,18 +86,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-function getWorkouts() {
-  return staticWorkouts;
+// FETCH WORKOUTS FROM DATABASE - Uses API call to server
+async function getWorkouts() {
+  if (!currentUser) return [];
+  
+  try {
+    const workouts = await apiCall(`/api/workouts/${currentUser.userId}`);
+    return workouts;
+  } catch (error) {
+    console.error('Error fetching workouts:', error);
+    return [];
+  }
 }
 
 
-function getGoals() {
-  return staticGoals;
+// FETCH GOALS FROM DATABASE - Uses API call to server
+async function getGoals() {
+  if (!currentUser) return [];
+  
+  try {
+    const goals = await apiCall(`/api/goals/${currentUser.userId}`);
+    return goals;
+  } catch (error) {
+    console.error('Error fetching goals:', error);
+    return [];
+  }
 }
 
 
-function getStreak() {
-  return 7;
+async function getStreak() {
+  if (!currentUser) return 0;
+  
+  try {
+    const userData = await apiCall(`/api/user/${currentUser.userId}`);
+    return userData.streak;
+  } catch (error) {
+    console.error('Error fetching streak:', error);
+    return currentUser ? currentUser.streak : 0; // Fallback to cached value
+  }
 }
 
 
@@ -141,13 +134,21 @@ function notify(title, body, tag) {
 }
 
 
-function calculateStats(workouts) {
-  return {
-    total: workouts.length,
-    reps: workouts.reduce((sum, w) => sum + (w.sets * w.reps), 0),
-    weight: workouts.reduce((sum, w) => sum + w.weight, 0),
-    duration: workouts.reduce((sum, w) => sum + w.duration, 0)
-  };
+async function calculateStats() {
+  if (!currentUser) return { total: 0, reps: 0, weight: 0, duration: 0 };
+  
+  try {
+    const stats = await apiCall(`/api/stats/${currentUser.userId}`);
+    return {
+      total: stats.total_workouts || 0,
+      reps: stats.total_reps || 0,
+      weight: stats.total_weight || 0,
+      duration: stats.total_duration || 0
+    };
+  } catch (error) {
+    console.error('Error calculating stats:', error);
+    return { total: 0, reps: 0, weight: 0, duration: 0 };
+  }
 }
 
 

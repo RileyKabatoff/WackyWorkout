@@ -1,0 +1,130 @@
+DATABASE NAME: workout_tracker.db
+DATABASE TYPE: SQLite3
+PURPOSE: Store user accounts and workout logging data for fitness tracking
+
+================================================================================
+TABLE 1: users
+================================================================================
+PURPOSE: Stores user account information and authentication credentials
+
+COLUMN NAME       | DATA TYPE | CONSTRAINTS                  | DESCRIPTION
+------------------|-----------|------------------------------|----------------------------
+user_id           | INTEGER   | PRIMARY KEY, AUTOINCREMENT   | Unique identifier for each user
+username          | TEXT      | NOT NULL, UNIQUE             | User's chosen username
+email             | TEXT      | NOT NULL, UNIQUE             | User's email address (used for login)
+password_hash     | TEXT      | NOT NULL                     | Hashed password (bcrypt)
+full_name         | TEXT      | -                            | User's full name (optional)
+streak            | INTEGER   | DEFAULT 0                    | Consecutive days with logged workouts
+total_workouts    | INTEGER   | DEFAULT 0                    | Total number of workouts logged
+created_at        | DATETIME  | DEFAULT CURRENT_TIMESTAMP    | Account creation timestamp
+last_login        | DATETIME  | -                            | Most recent login timestamp
+
+RELATIONSHIPS:
+- One user can have many workouts (ONE-TO-MANY with logged_workouts table)
+- One user can have many goals (ONE-TO-MANY with goals table)
+
+SAMPLE DATA:
+user_id | username  | email              | streak | total_workouts
+--------|-----------|-------------------|--------|----------------
+1       | DemoUser  | demo@workout.com  | 7      | 5
+================================================================================
+TABLE 2: logged_workouts
+================================================================================
+PURPOSE: Stores individual workout entries logged by users
+
+COLUMN NAME       | DATA TYPE | CONSTRAINTS                  | DESCRIPTION
+------------------|-----------|------------------------------|----------------------------
+workout_id        | INTEGER   | PRIMARY KEY, AUTOINCREMENT   | Unique identifier for each workout
+user_id           | INTEGER   | NOT NULL, FOREIGN KEY        | References users.user_id
+exercise_name     | TEXT      | NOT NULL                     | Name of exercise performed
+sets              | INTEGER   | NOT NULL, CHECK(sets > 0)    | Number of sets completed
+reps              | INTEGER   | NOT NULL, CHECK(reps > 0)    | Number of repetitions per set
+weight            | REAL      | DEFAULT 0                    | Weight used in pounds (allows decimals)
+duration          | INTEGER   | NOT NULL                     | Workout duration in minutes
+difficulty        | TEXT      | CHECK(IN 'easy','moderate'...) | Difficulty level of workout
+workout_date      | DATE      | NOT NULL                     | Date workout was performed
+workout_time      | TEXT      | -                            | Time of day workout was performed
+notes             | TEXT      | -                            | Optional user notes about workout
+created_at        | DATETIME  | DEFAULT CURRENT_TIMESTAMP    | Record creation timestamp
+
+RELATIONSHIPS:
+- Many workouts belong to one user (MANY-TO-ONE with users table)
+- FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+  (If user is deleted, their workouts are automatically deleted)
+
+SAMPLE DATA:
+workout_id | user_id | exercise_name | sets | reps | weight | duration | workout_date
+-----------|---------|---------------|------|------|--------|----------|-------------
+1          | 1       | Push-ups      | 3    | 20   | 0      | 15       | 2025-11-10
+2          | 1       | Squats        | 4    | 15   | 135    | 20       | 2025-11-11
+
+================================================================================
+TABLE 3: goals
+================================================================================
+PURPOSE: Stores user fitness goals and tracks progress
+
+COLUMN NAME       | DATA TYPE | CONSTRAINTS                  | DESCRIPTION
+------------------|-----------|------------------------------|----------------------------
+goal_id           | INTEGER   | PRIMARY KEY, AUTOINCREMENT   | Unique identifier for each goal
+user_id           | INTEGER   | NOT NULL, FOREIGN KEY        | References users.user_id
+goal_name         | TEXT      | NOT NULL                     | Name/description of goal
+target_value      | INTEGER   | NOT NULL, CHECK(> 0)         | Target number to achieve
+current_progress  | INTEGER   | DEFAULT 0, CHECK(>= 0)       | Current progress toward goal
+deadline          | DATE      | -                            | Target completion date (optional)
+is_completed      | INTEGER   | DEFAULT 0, CHECK(IN 0,1)     | Completion status (0=false, 1=true)
+completed_date    | DATE      | -                            | Date goal was completed
+created_at        | DATETIME  | DEFAULT CURRENT_TIMESTAMP    | Goal creation timestamp
+
+RELATIONSHIPS:
+- Many goals belong to one user (MANY-TO-ONE with users table)
+- FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+  (If user is deleted, their goals are automatically deleted)
+
+SAMPLE DATA:
+goal_id | user_id | goal_name      | target_value | current_progress | deadline   | is_completed
+--------|---------|----------------|--------------|------------------|------------|-------------
+1       | 1       | 1000 Push-ups  | 1000         | 1000             | 2025-11-15 | 1
+2       | 1       | 500 Squats     | 500          | 350              | 2025-12-01 | 0
+3       | 1       | 100 Pull-ups   | 100          | 45               | 2025-11-30 | 0
+
+================================================================================
+RELATIONSHIPS BETWEEN TABLES
+================================================================================
+
+RELATIONSHIP TYPE: ONE-TO-MANY (Multiple relationships)
+- One user (parent) can have many workouts (children)
+- One user (parent) can have many goals (children)
+- Each workout belongs to exactly one user
+- Each goal belongs to exactly one user
+
+JOIN CONDITIONS:
+users.user_id = logged_workouts.user_id
+users.user_id = goals.user_id
+
+REFERENTIAL INTEGRITY:
+- Foreign key constraint ensures every workout has a valid user_id
+- ON DELETE CASCADE: When user is deleted, all their workouts are deleted
+- This maintains data integrity and prevents orphaned records
+
+================================================================================
+DATA VALIDATION RULES
+================================================================================
+
+USERS TABLE:
+- username: Must be unique across all users
+- email: Must be unique and valid email format (validated in application)
+- password: Minimum 6 characters, hashed before storage (validated in application)
+- streak: Cannot be negative (enforced by application logic)
+
+LOGGED_WORKOUTS TABLE:
+- sets: Must be greater than 0 (CHECK constraint)
+- reps: Must be greater than 0 (CHECK constraint)
+- weight: Must be non-negative, allows decimals for precision
+- difficulty: Must be one of: 'easy', 'moderate', 'hard', 'extreme'
+- user_id: Must reference existing user in users table (FOREIGN KEY)
+
+GOALS TABLE:
+- target_value: Must be greater than 0 (CHECK constraint)
+- current_progress: Must be non-negative (CHECK constraint)
+- is_completed: Must be 0 or 1 (CHECK constraint, acts as boolean)
+- user_id: Must reference existing user in users table (FOREIGN KEY)

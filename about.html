@@ -126,7 +126,9 @@
 
   <script src="app.js"></script>
   <script>
-    document.getElementById('streakNumber').textContent = getStreak();
+    getStreak().then(streak => {
+      document.getElementById('streakNumber').textContent = streak;
+  });
   </script>
 </body>
 </html>

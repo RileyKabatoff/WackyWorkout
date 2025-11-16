@@ -1,0 +1,175 @@
+================================================================================
+              WACKY WORKOUT TRACKER - ENTITY RELATIONSHIP DIAGRAM
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           ENTITY RELATIONSHIP DIAGRAM                    │
+│                                                                          │
+│  Notation:                                                               │
+│  PK = Primary Key                                                        │
+│  FK = Foreign Key                                                        │
+│  ──  = One-to-Many Relationship                                          │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+    ┌──────────────────────────────────────┐
+    │             USERS                    │
+    │                                      │
+    │  PK  user_id (INTEGER)               │
+    │      username (TEXT) UNIQUE          │
+    │      email (TEXT) UNIQUE             │
+    │      password_hash (TEXT)            │
+    │      full_name (TEXT)                │
+    │      streak (INTEGER)                │
+    │      total_workouts (INTEGER)        │
+    │      created_at (DATETIME)           │
+    │      last_login (DATETIME)           │
+    │                                      │
+    └───────┬──────────────────┬───────────┘
+            │                  │
+            │                  │
+            │ ONE user         │ ONE user
+            │                  │
+            │ can have         │ can have
+            │                  │
+            │ MANY workouts    │ MANY goals
+            │                  │
+            ↓                  ↓
+┌───────────────────────┐  ┌────────────────────────┐
+│   LOGGED_WORKOUTS     │  │        GOALS           │
+│                       │  │                        │
+│  PK workout_id        │  │  PK goal_id            │
+│  FK user_id ────────┐ │  │  FK user_id ─────────┐ │
+│     exercise_name   │ │  │     goal_name        │ │
+│     sets            │ │  │     target_value     │ │
+│     reps            │ │  │     current_progress │ │
+│     weight          │ │  │     deadline         │ │
+│     duration        │ │  │     is_completed     │ │
+│     difficulty      │ │  │     completed_date   │ │
+│     workout_date    │ │  │     created_at       │ │
+│     workout_time    │ │  │                      │ │
+│     notes           │ │  └──────────────────────┼─┘
+│     created_at      │ │                         │
+│                     │ │                         │
+└─────────────────────┼─┘                         │
+                      │                           │
+                      │                           │
+    FOREIGN KEY       │     FOREIGN KEY           │
+    RELATIONSHIP      │     RELATIONSHIP          │
+    References        │     References            │
+    users.user_id ────┘     users.user_id ────────┘
+    ON DELETE CASCADE       ON DELETE CASCADE
+
+
+================================================================================
+RELATIONSHIP EXPLANATION
+================================================================================
+
+RELATIONSHIP TYPE: ONE-TO-MANY (Two separate relationships)
+---------------------------------
+• One user can log multiple workouts
+• One user can create multiple goals
+• Each workout belongs to exactly one user
+• Each goal belongs to exactly one user
+• User is the "parent" entity (ONE side)
+• Workouts and Goals are "child" entities (MANY side)
+
+CARDINALITY:
+---------------------------------
+USERS (1) ────< (∞) LOGGED_WORKOUTS
+  ONE              MANY
+
+USERS (1) ────< (∞) GOALS
+  ONE              MANY
+
+Reading the relationships:
+→ "One user has many workouts"
+→ "Each workout belongs to one user"
+→ "One user has many goals"
+→ "Each goal belongs to one user"
+
+FOREIGN KEY CONSTRAINTS:
+---------------------------------
+Field: logged_workouts.user_id
+References: users.user_id
+On Delete: CASCADE
+
+Field: goals.user_id
+References: users.user_id
+On Delete: CASCADE
+
+Meaning: 
+- Every workout must have a valid user_id that exists in the users table
+- Every goal must have a valid user_id that exists in the users table
+- If a user is deleted, all their workouts and goals are automatically deleted
+- This prevents orphaned records with no associated user
+
+JOIN CONDITIONS:
+---------------------------------
+To combine data from tables:
+
+    -- Join users with their workouts
+    SELECT *
+    FROM users u
+    INNER JOIN logged_workouts w 
+    ON u.user_id = w.user_id
+    
+    -- Join users with their goals
+    SELECT *
+    FROM users u
+    INNER JOIN goals g
+    ON u.user_id = g.user_id
+    
+    -- Join all three tables
+    SELECT *
+    FROM users u
+    LEFT JOIN logged_workouts w ON u.user_id = w.user_id
+    LEFT JOIN goals g ON u.user_id = g.user_id
+
+This links each workout and goal to its corresponding user information.
+
+================================================================================
+EXAMPLE DATA FLOW
+================================================================================
+
+USER CREATES ACCOUNT:
+----------------------
+1. New row inserted into USERS table
+   → user_id = 1 (auto-generated)
+   → username = "JohnDoe"
+   → email = "john@example.com"
+
+USER LOGS WORKOUTS:
+-------------------
+2. First workout inserted into LOGGED_WORKOUTS table
+   → workout_id = 1 (auto-generated)
+   → user_id = 1 (foreign key links to user)
+   → exercise_name = "Push-ups"
+   
+3. Second workout inserted
+   → workout_id = 2
+   → user_id = 1 (same user)
+   → exercise_name = "Squats"
+
+RESULT:
+-------
+User with user_id=1 now has 2 workouts (workout_id=1 and workout_id=2)
+The user_id field in LOGGED_WORKOUTS creates the relationship
+
+IF USER IS DELETED:
+-------------------
+• DELETE FROM users WHERE user_id = 1
+• CASCADE automatically deletes workout_id=1 AND workout_id=2
+• No orphaned workout records remain in database
+
+================================================================================
+ALTERNATIVE VISUAL REPRESENTATION (Crow's Foot Notation)
+================================================================================
+
+    USERS ||────────o{ LOGGED_WORKOUTS
+    
+    ||  = Exactly one (mandatory)
+    o{  = Zero or more (optional, many)
+    
+Reading: "Each user has zero or more workouts"

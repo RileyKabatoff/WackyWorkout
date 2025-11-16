@@ -21,48 +21,190 @@
           <input type="email" id="loginEmail" placeholder="Email" value="demo@workout.com" required>
         </div>
         <div class="form-group">
-          <input type="password" id="loginPassword" placeholder="Password" value="password" required>
+          <input type="password" id="loginPassword" placeholder="Password" value="Demo123!" required>
         </div>
         <button type="submit" class="btn btn-primary">LOGIN</button>
       </form>
       
-      <p class="demo-text"><b>Demo: Use any email/password</b></p>
+      <div id="toggleFormSection">
+        <p class="demo-text" style="margin-bottom: 0.5rem;">
+          Don't have an account? 
+          <button onclick="toggleRegistration()" style="background: none; border: none; color: #ef4444; cursor: pointer; text-decoration: underline; font-weight: bold;">
+            Sign up here
+          </button>
+        </p>
+        <p class="demo-text"><b>Or use demo: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2f4b4a42406f58405d44405a5b014c4042">[email&#160;protected]</a> / Demo123!</b></p>
+      </div>
+      
+      <!-- Registration Form (Hidden by default) -->
+      <div id="registrationForm" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #dc2626;">
+        <h2 style="color: #ef4444; margin-bottom: 1rem; text-align: center;">Create New Account</h2>
+        <form id="registerForm">
+          <div class="form-group">
+            <input type="text" id="registerFullName" placeholder="Full Name" required>
+          </div>
+          <div class="form-group">
+            <input type="text" id="registerUsername" placeholder="Username" required>
+          </div>
+          <div class="form-group">
+            <input type="email" id="registerEmail" placeholder="Email" required>
+          </div>
+          <div class="form-group">
+            <input type="password" id="registerPassword" placeholder="Password (min 6 characters)" required minlength="6">
+          </div>
+          <div class="form-group">
+            <input type="password" id="registerConfirmPassword" placeholder="Confirm Password" required>
+          </div>
+          <button type="submit" class="btn btn-primary">CREATE ACCOUNT</button>
+          <button type="button" onclick="toggleRegistration()" class="btn btn-secondary">
+            Back to Login
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="app.js"></script>
   <script>
-    document.getElementById('loginForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
-      
-      // FORM VALIDATION - This code validates that the email input matches proper email format
-      // The validateEmail() function uses a regular expression to check for: username@domain.extension
-      // If validation fails, an alert is shown and the form does not submit
-      if (!validateEmail(email)) {
-        alert('Please enter a valid email address (e.g., user@example.com)');
-        return;
-      }
-      
-      if (email && password) {
-        if (Notification.permission === 'default') {
-          Notification.requestPermission();
-        }
+    // Toggle between login and registration forms
+function toggleRegistration() {
+  const loginForm = document.getElementById('loginForm');
+  const registrationForm = document.getElementById('registrationForm');
+  const toggleSection = document.getElementById('toggleFormSection');
   
-        if ('Notification' in window && Notification.permission === 'granted') {
-          const userName = email.split('@')[0];
-          new Notification('Wacky Workout Tracker', {
-            body: `Welcome back, ${userName}!`,
-            tag: 'login'
-          });
-        }
+  if (registrationForm.style.display === 'none') {
+    // Show registration form, hide login form
+    loginForm.style.display = 'none';
+    registrationForm.style.display = 'block';
+    toggleSection.style.display = 'none';
+  } else {
+    // Show login form, hide registration form
+    loginForm.style.display = 'block';
+    registrationForm.style.display = 'none';
+    toggleSection.style.display = 'block';
+  }
+}
 
-        window.location.href = 'index.html';
-      } else {
-        alert('Please enter both email and password');
-      }
+// Handle registration form submission
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const fullName = document.getElementById('registerFullName').value;
+  const username = document.getElementById('registerUsername').value;
+  const email = document.getElementById('registerEmail').value;
+  const password = document.getElementById('registerPassword').value;
+  const confirmPassword = document.getElementById('registerConfirmPassword').value;
+  
+  // Validate email format
+  if (!validateEmail(email)) {
+    alert('Please enter a valid email address');
+    return;
+  }
+  
+  // Check password length
+  if (password.length < 6) {
+    alert('Password must be at least 6 characters long');
+    return;
+  }
+  
+  // Check passwords match
+  if (password !== confirmPassword) {
+    alert('Passwords do not match');
+    return;
+  }
+  
+  try {
+    // Call registration API
+    const response = await fetch('http://localhost:3000/api/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        fullName: fullName,
+        username: username,
+        email: email,
+        password: password
+      })
     });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      alert(data.error || 'Registration failed. Username or email may already exist.');
+      return;
+    }
+    
+    // Registration successful
+    alert('Account created successfully! Please log in with your new credentials.');
+    
+    // Clear registration form
+    document.getElementById('registerForm').reset();
+    
+    // Switch back to login form
+    toggleRegistration();
+    
+    // Pre-fill email in login form
+    document.getElementById('loginEmail').value = email;
+    
+  } catch (error) {
+    console.error('Registration error:', error);
+    alert('An error occurred during registration. Please try again.');
+  }
+});
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  
+  // Validate email format
+  if (!validateEmail(email)) {
+    alert('Please enter a valid email address');
+    return;
+  }
+  
+  try {
+    // Call login API
+    const result = await fetch('http://localhost:3000/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
+    
+    const data = await result.json();
+    
+    if (!result.ok) {
+      alert(data.error || 'Login failed');
+      return;
+    }
+    
+    // Store user session
+    sessionStorage.setItem('currentUser', JSON.stringify(data.user));
+    
+    // Request notification permission
+    if (Notification.permission === 'default') {
+      await Notification.requestPermission();
+    }
+    
+    // Show welcome notification
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Wacky Workout Tracker', {
+        body: `Welcome back, ${data.user.username}!`,
+        tag: 'login'
+      });
+    }
+    
+    // Redirect to dashboard
+    window.location.href = 'index.html';
+    
+  } catch (error) {
+    console.error('Login error:', error);
+    alert('An error occurred during login. Please try again.');
+  }
+});
   </script>
 </body>
 </html>
