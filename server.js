@@ -1,7 +1,3 @@
-// ============================================================================
-// WACKY WORKOUT TRACKER - SERVER.JS
-// This file creates an Express server and connects it to a SQLite database
-// ============================================================================
 
 // DEPENDENCIES - Import required Node.js modules
 const express = require('express');           // Web framework for creating server
@@ -18,14 +14,12 @@ const path = require('path');                 // File path utilities
 const app = express();
 const PORT = 3000;
 
-// MIDDLEWARE - Functions that process requests before they reach routes
 app.use(cors());                                    // Enable CORS for all routes
 app.use(bodyParser.json());                         // Parse JSON request bodies
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "login.html"));
+});
 app.use(express.static(path.join(__dirname)));      // Serve static files (HTML, CSS, JS)
-
-// ============================================================================
-// DATABASE CONNECTION
-// ============================================================================
 
 // DATA TYPE: Database Connection Object
 // Creates a connection to the SQLite database file

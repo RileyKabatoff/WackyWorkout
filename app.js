@@ -122,7 +122,7 @@ async function getStreak() {
     return userData.streak;
   } catch (error) {
     console.error('Error fetching streak:', error);
-    return currentUser ? currentUser.streak : 0; // Fallback to cached value
+    return currentUser ? currentUser.streak : 0;
   }
 }
 
@@ -153,7 +153,6 @@ async function calculateStats() {
 
 
 
-// FORM VALIDATION - Email validation function
 function validateEmail(email) {
   // Regular expression pattern to check if email format is valid
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -240,14 +239,11 @@ function toggleElement(elementId) {
   }
 }
 
-// CHANGE FORMATTING - Change theme/appearance with sessionStorage persistence
-// This version saves the theme preference only for the current session
-// sessionStorage stores the theme choice ('light' or 'dark') until the browser is closed
+// CHANGE FORMATTING - Change theme/appearance
 function toggleDarkMode() {
   const body = document.body;
   body.classList.toggle('light-mode');
   
-  // Save theme preference to sessionStorage (only lasts for current session)
   if (body.classList.contains('light-mode')) {
     sessionStorage.setItem('wackyWorkoutTheme', 'light');
   } else {
