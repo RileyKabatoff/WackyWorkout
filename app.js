@@ -1,9 +1,16 @@
 // USER SESSION MANAGEMENT
-// Stores current logged-in user information in sessionStorage
-let currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || null;
+// FIX: Instead of loading currentUser once, create a function that always gets fresh data
+function getCurrentUser() {
+  const userData = sessionStorage.getItem('currentUser');
+  return userData ? JSON.parse(userData) : null;
+}
+
+// Initialize currentUser
+let currentUser = getCurrentUser();
 
 // Helper function to check if user is logged in
 function requireAuth() {
+  currentUser = getCurrentUser(); // CRITICAL: Refresh user data from sessionStorage
   if (!currentUser) {
     alert('Please log in to access this page');
     window.location.href = 'login.html';
@@ -42,9 +49,6 @@ async function apiCall(endpoint, method = 'GET', data = null) {
 
 
 // VARIABLE EXAMPLE - let keyword declares a block-scoped variable that CAN be changed/reassigned
-// Type: Boolean (true/false value)
-// Can be changed: YES - let variables can be reassigned to new values
-// Example: secretAccessGranted starts as false but can be changed to true when password is correct
 let secretAccessGranted = false;
 
 // Secret password for accessing hidden section
@@ -52,8 +56,6 @@ const SECRET_PASSWORD = "WACKY2025";
 
 
 // THEME MANAGEMENT - Load saved theme on page load
-// This code runs immediately when the script loads to apply the saved theme preference
-// Uses sessionStorage to persist theme choice across page navigation (but not after closing browser)
 (function() {
   const savedTheme = sessionStorage.getItem('wackyWorkoutTheme');
   if (savedTheme === 'light') {
@@ -63,10 +65,6 @@ const SECRET_PASSWORD = "WACKY2025";
 
 
 // Logout functionality
-// EVENT LISTENER - This code demonstrates how event listeners work
-// addEventListener() attaches an event handler to the document that waits for DOMContentLoaded event
-// When the DOM is fully loaded, the callback function executes, setting up click handlers
-// The click event listener on logoutBtn waits for user clicks and triggers the logout confirmation
 document.addEventListener('DOMContentLoaded', () => {
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
@@ -75,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (confirm('Are you sure you want to logout?')) {
         // Clear session storage
         sessionStorage.removeItem('currentUser');
+        currentUser = null; // Also clear the variable
         
         // Redirect to login page
         window.location.href = 'login.html';
@@ -88,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // FETCH WORKOUTS FROM DATABASE - Uses API call to server
 async function getWorkouts() {
+  currentUser = getCurrentUser(); // FIX: Always refresh user data
   if (!currentUser) return [];
   
   try {
@@ -102,6 +102,7 @@ async function getWorkouts() {
 
 // FETCH GOALS FROM DATABASE - Uses API call to server
 async function getGoals() {
+  currentUser = getCurrentUser(); // FIX: Always refresh user data
   if (!currentUser) return [];
   
   try {
@@ -115,14 +116,15 @@ async function getGoals() {
 
 
 async function getStreak() {
+  currentUser = getCurrentUser(); // FIX: Always refresh user data
   if (!currentUser) return 0;
   
   try {
     const userData = await apiCall(`/api/user/${currentUser.userId}`);
-    return userData.streak;
+    return userData.streak || 0; // Changed to always default to 0
   } catch (error) {
     console.error('Error fetching streak:', error);
-    return currentUser ? currentUser.streak : 0; // Fallback to cached value
+    return 0; // Changed to return 0 instead of cached value
   }
 }
 
@@ -135,6 +137,7 @@ function notify(title, body, tag) {
 
 
 async function calculateStats() {
+  currentUser = getCurrentUser(); // FIX: Always refresh user data
   if (!currentUser) return { total: 0, reps: 0, weight: 0, duration: 0 };
   
   try {
@@ -155,41 +158,31 @@ async function calculateStats() {
 
 // FORM VALIDATION - Email validation function
 function validateEmail(email) {
-  // Regular expression pattern to check if email format is valid
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailPattern.test(email);
 }
 
 // FORM VALIDATION - Validates workout form inputs
 function validateWorkoutForm(exerciseName, sets, reps, duration, weight) {
-  // CONTROL FLOW - Type: if/else conditional statements
-  // Why used: To check different validation conditions and execute different code paths
-  // What it does: Tests each input value against validation rules - if a test fails, 
-  // an alert is shown and function returns false to prevent form submission
-  // Each if statement checks a specific condition, and only if all pass does the function return true
   if (!exerciseName || exerciseName.trim() === '') {
     alert('Please enter an exercise name');
     return false;
   }
-  
   
   if (isNaN(sets) || sets <= 0) {
     alert('Sets must be a positive number');
     return false;
   }
   
-  
   if (isNaN(reps) || reps <= 0) {
     alert('Reps must be a positive number');
     return false;
   }
   
-  
   if (isNaN(duration) || duration <= 0) {
     alert('Duration must be a positive number');
     return false;
   }
-  
   
   if (isNaN(weight) || weight < 0) {
     alert('Weight must be a non-negative number');
@@ -217,7 +210,6 @@ function validateInputOnType(inputElement, validationType) {
         break;
     }
     
-    
     if (value === '') {
       this.style.borderColor = '#dc2626';
     } else if (isValid) {
@@ -241,13 +233,10 @@ function toggleElement(elementId) {
 }
 
 // CHANGE FORMATTING - Change theme/appearance with sessionStorage persistence
-// This version saves the theme preference only for the current session
-// sessionStorage stores the theme choice ('light' or 'dark') until the browser is closed
 function toggleDarkMode() {
   const body = document.body;
   body.classList.toggle('light-mode');
   
-  // Save theme preference to sessionStorage (only lasts for current session)
   if (body.classList.contains('light-mode')) {
     sessionStorage.setItem('wackyWorkoutTheme', 'light');
   } else {
@@ -339,13 +328,6 @@ function filterWorkouts(searchTerm) {
 
 
 // FUNCTION EXPLANATION - calculateTotalProgress()
-// How it works: 
-// 1. Takes an array of workout objects as a parameter
-// 2. Uses the reduce() method to iterate through each workout in the array
-// 3. For each workout, it adds the workout's values (sets, reps, weight, duration) to running totals
-// 4. The accumulator object 'totals' starts with all values at 0
-// 5. After processing all workouts, returns an object containing the summed totals
-// 6. The || 0 provides a default value of 0 if a property is undefined
 function calculateTotalProgress(workouts) {
   return workouts.reduce((totals, workout) => {
     totals.totalSets += workout.sets || 0;
@@ -366,8 +348,6 @@ function handleFormSubmit(event, formId) {
   if (form) {
     const formData = new FormData(form);
     console.log('Form submitted:', Object.fromEntries(formData));
-    
-    // Placeholder for Python backend integration
     
     alert('Form submitted successfully! Data will be processed by Python backend.');
     form.reset();
