@@ -124,7 +124,11 @@ async function getStreak() {
     return userData.streak || 0; // Changed to always default to 0
   } catch (error) {
     console.error('Error fetching streak:', error);
+<<<<<<< HEAD
     return 0; // Changed to return 0 instead of cached value
+=======
+    return currentUser ? currentUser.streak : 0;
+>>>>>>> befb0c2fda1fc86263898742a0d5ab13d1d55f6a
   }
 }
 
@@ -156,7 +160,6 @@ async function calculateStats() {
 
 
 
-// FORM VALIDATION - Email validation function
 function validateEmail(email) {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailPattern.test(email);
@@ -232,7 +235,11 @@ function toggleElement(elementId) {
   }
 }
 
+<<<<<<< HEAD
 // CHANGE FORMATTING - Change theme/appearance with sessionStorage persistence
+=======
+// CHANGE FORMATTING - Change theme/appearance
+>>>>>>> befb0c2fda1fc86263898742a0d5ab13d1d55f6a
 function toggleDarkMode() {
   const body = document.body;
   body.classList.toggle('light-mode');
