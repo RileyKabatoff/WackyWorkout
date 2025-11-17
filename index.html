@@ -37,7 +37,7 @@
         </button>
         
         <div class="streak-badge">
-          <div class="streak-number" id="streakNumber">0</div>
+          <div class="streak-number" id="streakNumber">...</div>
           <div class="streak-label">Day Streak 🔥</div>
         </div>
         <button class="btn-logout" id="logoutBtn">
@@ -134,19 +134,15 @@
 
 <script src="app.js"></script>
 <script>
-  // Check authentication
-  const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-  if (!currentUser) {
-    window.location.href = 'login.html';
+  if (!requireAuth()) {
+    
   }
   
-  // Initialize page with async function
   async function initDashboard() {
     try {
       // Update streak display
-      getStreak().then(streak => {
-        document.getElementById('streakNumber').textContent = streak;
-      });
+      const streak = await getStreak();
+      document.getElementById('streakNumber').textContent = streak;
       
       // Fetch and display stats
       const stats = await calculateStats();
@@ -177,7 +173,6 @@
       if (workouts.length === 0) {
         workoutList.innerHTML = '<p class="empty-state empty-state-dark">No workouts yet! Log your first workout.</p>';
       } else {
-        // Display most recent 5 workouts
         const recentWorkouts = workouts.slice(0, 5);
         workoutList.innerHTML = recentWorkouts.map(w => `
           <div class="workout-item">
@@ -199,13 +194,10 @@
     }
   }
   
-  // Edit workout function
   function editWorkout(id) {
     alert('Edit functionality - To be implemented in future update');
-    // Future: Could redirect to editing page or open modal
   }
   
-  // Delete workout function
   async function deleteWorkout(id) {
     if (!confirm('Are you sure you want to delete this workout?')) {
       return;
@@ -224,8 +216,6 @@
       }
       
       alert('Workout deleted successfully!');
-      
-      // Reload dashboard
       initDashboard();
       
     } catch (error) {
@@ -234,7 +224,6 @@
     }
   }
   
-  // Initialize dashboard on page load
   initDashboard();
 </script>
 </body>

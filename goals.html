@@ -91,27 +91,34 @@
 
   <script src="app.js"></script>
 <script>
-  // Check authentication
-  const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-  if (!currentUser) {
-    window.location.href = 'login.html';
+  
+  if (!requireAuth()) {
+    ;
   }
+
   
-  // Update streak display
-  getStreak().then(streak => {
-    document.getElementById('streakNumber').textContent = streak;
-  });
+  (async () => {
+  const streak = await getStreak();
+  document.getElementById('streakNumber').textContent = streak;
+})();
+
   
-  // Handle goal form submission
   document.getElementById('goalForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
+    const user = getCurrentUser(); // from app.js
+    if (!user) {
+      window.location.href = 'login.html';
+      return;
+    }
+
     const goalData = {
-      userId: currentUser.userId,
+      userId: user.userId,
       goalName: document.getElementById('goalName').value,
       targetValue: parseInt(document.getElementById('goalTarget').value),
       deadline: document.getElementById('goalDeadline').value || null
     };
+
     
     try {
       const response = await fetch('http://localhost:3000/api/goals', {
