@@ -89,11 +89,8 @@
         </div>
         
         <div class="workout-list" id="workoutList">
-          <!-- Workouts will be populated by JavaScript -->
         </div>
       </div>
-
-      <!-- Secret Section with Password Access -->
       <div class="card">
         <h2 class="card-title">🔒 Secret Advanced Statistics</h2>
         <p style="color: #fca5a5; margin-bottom: 1rem;">Enter password to access advanced analytics:</p>
@@ -140,11 +137,9 @@
   
   async function initDashboard() {
     try {
-      // Update streak display
       const streak = await getStreak();
       document.getElementById('streakNumber').textContent = streak;
       
-      // Fetch and display stats
       const stats = await calculateStats();
       
       document.getElementById('statsGrid').innerHTML = `
