@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // FETCH WORKOUTS FROM DATABASE - Uses API call to server
 async function getWorkouts() {
-  currentUser = getCurrentUser(); // FIX: Always refresh user data
+  currentUser = getCurrentUser();
   if (!currentUser) return [];
   
   try {
@@ -100,7 +100,7 @@ async function getWorkouts() {
 
 // FETCH GOALS FROM DATABASE - Uses API call to server
 async function getGoals() {
-  currentUser = getCurrentUser(); // FIX: Always refresh user data
+  currentUser = getCurrentUser();
   if (!currentUser) return [];
   
   try {
@@ -114,12 +114,12 @@ async function getGoals() {
 
 
 async function getStreak() {
-  currentUser = getCurrentUser(); // FIX: Always refresh user data
+  currentUser = getCurrentUser();
   if (!currentUser) return 0;
   
   try {
     const userData = await apiCall(`/api/user/${currentUser.userId}`);
-    return userData.streak || 0; // Changed to always default to 0
+    return userData.streak || 0;
   } catch (error) {
     console.error('Error fetching streak:', error);
     return currentUser ? currentUser.streak : 0;
@@ -135,7 +135,7 @@ function notify(title, body, tag) {
 
 
 async function calculateStats() {
-  currentUser = getCurrentUser(); // FIX: Always refresh user data
+  currentUser = getCurrentUser();
   if (!currentUser) return { total: 0, reps: 0, weight: 0, duration: 0 };
   
   try {

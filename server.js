@@ -1,5 +1,5 @@
 
-// DEPENDENCIES - Import required Node.js modules
+// DEPENDENCIES
 const express = require('express');           // Web framework for creating server
 const sqlite3 = require('sqlite3').verbose(); // SQLite database driver
 const cors = require('cors');                 // Cross-Origin Resource Sharing
@@ -27,7 +27,7 @@ const db = new sqlite3.Database('./workout_tracker.db', (err) => {
   if (err) {
     console.error('Error connecting to database:', err.message);
   } else {
-    console.log('✅ Connected to SQLite database: workout_tracker.db');
+    console.log('Connected to database');
   }
 });
 
@@ -40,7 +40,7 @@ const db = new sqlite3.Database('./workout_tracker.db', (err) => {
 // A transaction ensures all table creations succeed or fail together
 // This maintains database integrity during setup
 db.serialize(() => {
-  console.log('🔧 Setting up database tables...');
+  console.log('Setting up database tables...');
 
   // Begin transaction for table creation
   db.run('BEGIN TRANSACTION');
@@ -88,7 +88,7 @@ db.serialize(() => {
       console.error('❌ Error creating users table:', err.message);
       db.run('ROLLBACK'); // Cancel transaction on error
     } else {
-      console.log('✅ Users table created/verified');
+      console.log('Users table created/verified');
     }
   });
 
@@ -147,7 +147,7 @@ db.serialize(() => {
       console.error('❌ Error creating logged_workouts table:', err.message);
       db.run('ROLLBACK');
     } else {
-      console.log('✅ Logged_workouts table created/verified');
+      console.log('Logged_workouts table created/verified');
     }
   });
 
@@ -202,7 +202,7 @@ db.serialize(() => {
       console.error('❌ Error creating goals table:', err.message);
       db.run('ROLLBACK');
     } else {
-      console.log('✅ Goals table created/verified');
+      console.log('Goals table created/verified');
     }
   });
 
@@ -211,21 +211,17 @@ db.serialize(() => {
     if (err) {
       console.error('❌ Transaction commit failed:', err.message);
     } else {
-      console.log('✅ Database initialization transaction completed');
+      console.log('Database initialization transaction completed');
       
-      // After tables are created, populate demo data
       populateDemoData();
     }
   });
 });
 
-// ============================================================================
 // POPULATE DEMO USER DATA - Part of CREATE (CRUD)
 // SQL POPULATION using INSERT statements
-// ============================================================================
-
 function populateDemoData() {
-  console.log('📊 Checking for demo data...');
+  console.log('Checking for demo data...');
 
   // Check if demo user already exists
   db.get('SELECT user_id FROM users WHERE email = ?', ['demo@workout.com'], (err, row) => {
@@ -235,7 +231,7 @@ function populateDemoData() {
     }
 
     if (row) {
-      console.log('ℹ️  Demo user already exists. Skipping population.');
+      console.log('Demo user already exists. Skipping population.');
       return;
     }
 
@@ -260,7 +256,7 @@ function populateDemoData() {
         }
 
         const demoUserId = this.lastID;
-        console.log(`✅ Demo user created with ID: ${demoUserId}`);
+        console.log(`Demo user created with ID: ${demoUserId}`);
 
         // INSERT demo workouts - SQL POPULATION
         const demoWorkouts = [
@@ -310,16 +306,16 @@ function populateDemoData() {
             console.error('Error inserting demo goals:', err.message);
             db.run('ROLLBACK');
           } else {
-            console.log('✅ Demo goals inserted');
+            console.log('Demo goals inserted');
           }
         });
             db.run('COMMIT', (err) => {
               if (err) {
                 console.error('Transaction commit failed:', err.message);
               } else {
-                console.log('✅ Demo data population completed successfully!');
-                console.log('📧 Demo Login: demo@workout.com');
-                console.log('🔑 Demo Password: Demo123!');
+                console.log('Demo data population completed successfully!');
+                console.log('Demo Login: demo@workout.com');
+                console.log('Demo Password: Demo123!');
               }
             });
           }
@@ -329,17 +325,11 @@ function populateDemoData() {
   });
 }
 
-// ============================================================================
 // API ROUTES - CRUD OPERATIONS
-// ============================================================================
-
-// ----------------------------------------------------------------------------
 // CREATE - User Registration (part of CRUD)
-// ----------------------------------------------------------------------------
 app.post('/api/register', (req, res) => {
   const { email, password, username, fullName } = req.body;
 
-  // Hash password for security
   bcrypt.hash(password, 10, (err, hash) => {
     if (err) {
       return res.status(500).json({ error: 'Error hashing password' });
@@ -362,10 +352,8 @@ app.post('/api/register', (req, res) => {
   });
 });
 
-// ----------------------------------------------------------------------------
 // READ - User Login (part of CRUD)
 // Uses SELECT to read data from database
-// ----------------------------------------------------------------------------
 app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
 
@@ -379,7 +367,6 @@ app.post('/api/login', (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Compare password with stored hash
     bcrypt.compare(password, user.password_hash, (err, match) => {
       if (err || !match) {
         return res.status(401).json({ error: 'Invalid credentials' });
@@ -427,10 +414,8 @@ app.get('/api/user/:userId', (req, res) => {
   });
 });
 
-// ----------------------------------------------------------------------------
 // CREATE - Log New Workout (part of CRUD)
 // FORM INPUT population - Data comes from logging.html form
-// ----------------------------------------------------------------------------
 app.post('/api/workouts', (req, res) => {
   const {
     userId,
@@ -492,11 +477,9 @@ app.post('/api/workouts', (req, res) => {
   });
 });
 
-// ----------------------------------------------------------------------------
 // READ - Get User's Workouts (part of CRUD)
 // FILTERING - Uses WHERE clause to filter by user_id
 // SORTING - Uses ORDER BY to sort results by date (newest first)
-// ----------------------------------------------------------------------------
 app.get('/api/workouts/:userId', (req, res) => {
   const userId = req.params.userId;
 
@@ -527,11 +510,9 @@ app.get('/api/workouts/:userId', (req, res) => {
   });
 });
 
-// ----------------------------------------------------------------------------
 // READ - Get Workout Statistics with AGGREGATION and GROUPING
 // AGGREGATING - Uses COUNT, SUM, AVG functions
 // GROUPING - Uses GROUP BY to group data by exercise
-// ----------------------------------------------------------------------------
 app.get('/api/stats/:userId', (req, res) => {
   const userId = req.params.userId;
 
@@ -566,11 +547,9 @@ app.get('/api/stats/:userId', (req, res) => {
   });
 });
 
-// ----------------------------------------------------------------------------
 // READ - Get Exercise Breakdown with GROUPING
 // GROUPING - Groups workouts by exercise name and counts them
 // SORTING - Orders by frequency (most performed exercises first)
-// ----------------------------------------------------------------------------
 app.get('/api/exercise-breakdown/:userId', (req, res) => {
   const userId = req.params.userId;
 
@@ -601,10 +580,8 @@ app.get('/api/exercise-breakdown/:userId', (req, res) => {
   });
 });
 
-// ----------------------------------------------------------------------------
 // READ - Get Recent Workouts with SUBQUERY
 // SUBQUERY - Uses nested SELECT to get dates with workouts
-// ----------------------------------------------------------------------------
 app.get('/api/recent-workouts/:userId', (req, res) => {
   const userId = req.params.userId;
 
@@ -637,9 +614,7 @@ app.get('/api/recent-workouts/:userId', (req, res) => {
   });
 });
 
-// ----------------------------------------------------------------------------
 // UPDATE - Edit Workout (part of CRUD)
-// ----------------------------------------------------------------------------
 app.put('/api/workouts/:workoutId', (req, res) => {
   const workoutId = req.params.workoutId;
   const {
@@ -678,9 +653,7 @@ app.put('/api/workouts/:workoutId', (req, res) => {
   });
 });
 
-// ----------------------------------------------------------------------------
 // DELETE - Delete Workout (part of CRUD)
-// ----------------------------------------------------------------------------
 app.delete('/api/workouts/:workoutId', (req, res) => {
   const workoutId = req.params.workoutId;
 
@@ -729,14 +702,10 @@ app.delete('/api/workouts/:workoutId', (req, res) => {
   });
 });
 
-// ============================================================================
 // GOALS API ROUTES - CRUD OPERATIONS FOR GOALS
-// ============================================================================
 
-// ----------------------------------------------------------------------------
 // CREATE - Create New Goal (part of CRUD)
 // FORM INPUT population - Data comes from goals.html form
-// ----------------------------------------------------------------------------
 app.post('/api/goals', (req, res) => {
   const { userId, goalName, targetValue, deadline } = req.body;
 
@@ -762,11 +731,9 @@ app.post('/api/goals', (req, res) => {
   });
 });
 
-// ----------------------------------------------------------------------------
 // READ - Get User's Goals (part of CRUD)
 // FILTERING - Uses WHERE clause to filter by user_id
 // SORTING - Uses ORDER BY to sort results
-// ----------------------------------------------------------------------------
 app.get('/api/goals/:userId', (req, res) => {
   const userId = req.params.userId;
 
@@ -802,9 +769,7 @@ app.get('/api/goals/:userId', (req, res) => {
   });
 });
 
-// ----------------------------------------------------------------------------
 // UPDATE - Update Goal Progress (part of CRUD)
-// ----------------------------------------------------------------------------
 app.put('/api/goals/:goalId/progress', (req, res) => {
   const goalId = req.params.goalId;
   const { progress } = req.body;
@@ -814,7 +779,6 @@ app.put('/api/goals/:goalId/progress', (req, res) => {
   db.serialize(() => {
     db.run('BEGIN TRANSACTION');
 
-    // Get goal details first
     db.get('SELECT target_value FROM goals WHERE goal_id = ?', [goalId], (err, goal) => {
       if (err || !goal) {
         db.run('ROLLBACK');
@@ -853,9 +817,7 @@ app.put('/api/goals/:goalId/progress', (req, res) => {
   });
 });
 
-// ----------------------------------------------------------------------------
 // DELETE - Delete Goal (part of CRUD)
-// ----------------------------------------------------------------------------
 app.delete('/api/goals/:goalId', (req, res) => {
   const goalId = req.params.goalId;
 
@@ -874,10 +836,8 @@ app.delete('/api/goals/:goalId', (req, res) => {
   });
 });
 
-// ----------------------------------------------------------------------------
 // BONUS: JOIN QUERY - Combines data from users and logged_workouts tables
 // Shows user information alongside their workout data
-// ----------------------------------------------------------------------------
 app.get('/api/user-workouts/:userId', (req, res) => {
   const userId = req.params.userId;
 
@@ -914,20 +874,23 @@ app.get('/api/user-workouts/:userId', (req, res) => {
   });
 });
 
-// ============================================================================
 // START SERVER
-// ============================================================================
 
 app.listen(PORT, () => {
   console.log('');
   console.log('================================================================================');
   console.log('🔥 WACKY WORKOUT TRACKER SERVER STARTED 🔥');
   console.log('================================================================================');
-  console.log(`🌐 Server running on: http://localhost:${PORT}`);
-  console.log(`📂 Serving static files from: ${__dirname}`);
-  console.log(`💾 Database: workout_tracker.db`);
+  console.log(`Running on port 3000`);
+  console.log('http://localhost:${PORT}');
+  console.log(`Serving static files from: ${__dirname}`);
+  console.log(`Database: workout_tracker.db`);
   console.log('');
-  console.log('📋 Available endpoints:');
+  console.log('Demo Login: demo@workout.com');
+  console.log('Demo Password: Demo123!');
+  console.log('Secret Password: WACKY2025');
+  console.log('');
+  console.log('Available endpoints:');
   console.log('   POST   /api/register');
   console.log('   POST   /api/login');
   console.log('   POST   /api/workouts');
@@ -938,17 +901,15 @@ app.listen(PORT, () => {
   console.log('   GET    /api/user-workouts/:userId (JOIN query)');
   console.log('   PUT    /api/workouts/:workoutId');
   console.log('   DELETE /api/workouts/:workoutId');
-  console.log('================================================================================');
-  console.log('');
 });
 
-// Graceful shutdown
+// shutdown
 process.on('SIGINT', () => {
   db.close((err) => {
     if (err) {
       console.error('Error closing database:', err.message);
     } else {
-      console.log('✅ Database connection closed');
+      console.log('Okay its off');
     }
     process.exit(0);
   });
