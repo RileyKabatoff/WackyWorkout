@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Wacky Workout Tracker</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <div class="login-header">
+        <span class="flame-icon">🔥</span>
+        <h1 class="logo-text">WACKY  WORKOUT</h1>
+        <span class="flame-icon">🔥</span>
+      </div>
+      <p class="login-subtitle">Login to your account</p>
+      <form id="loginForm">
+        <div class="form-group">
+          <input type="email" id="loginEmail" placeholder="Email" required>
+        </div>
+        <div class="form-group">
+          <input type="password" id="loginPassword" placeholder="Password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">LOGIN</button>
+      </form>
+      
+      <div id="toggleFormSection">
+        <p class="demo-text" style="margin-bottom: 0.5rem;">
+          Don't have an account? 
+          <button onclick="toggleRegistration()" style="background: none; border: none; color: #ef4444; cursor: pointer; text-decoration: underline; font-weight: bold;">
+            Sign up here
+          </button>
+        </p>
+        <p class="demo-text"><b>Or use demo: demo@workout.com / Demo123!</b></p>
+      </div>
+      
+      <div id="registrationForm" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #dc2626;">
+        <h2 style="color: #ef4444; margin-bottom: 1rem; text-align: center;">Create New Account</h2>
+        <form id="registerForm">
+          <div class="form-group">
+            <input type="text" id="registerFullName" placeholder="Full Name" required>
+          </div>
+          <div class="form-group">
+            <input type="text" id="registerUsername" placeholder="Username" required>
+          </div>
+          <div class="form-group">
+            <input type="email" id="registerEmail" placeholder="Email" required>
+          </div>
+          <div class="form-group">
+            <input type="password" id="registerPassword" placeholder="Password (min 6 characters)" required minlength="6">
+          </div>
+          <div class="form-group">
+            <input type="password" id="registerConfirmPassword" placeholder="Confirm Password" required>
+          </div>
+          <button type="submit" class="btn btn-primary">CREATE ACCOUNT</button>
+          <button type="button" onclick="toggleRegistration()" class="btn btn-secondary">
+            Back to Login
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+function toggleRegistration() {
+  const loginForm = document.getElementById('loginForm');
+  const registrationForm = document.getElementById('registrationForm');
+  const toggleSection = document.getElementById('toggleFormSection');
+  
+  if (registrationForm.style.display === 'none') {
+    loginForm.style.display = 'none';
+    registrationForm.style.display = 'block';
+    toggleSection.style.display = 'none';
+  } else {
+    loginForm.style.display = 'block';
+    registrationForm.style.display = 'none';
+    toggleSection.style.display = 'block';
+  }
+}
+
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const fullName = document.getElementById('registerFullName').value;
+  const username = document.getElementById('registerUsername').value;
+  const email = document.getElementById('registerEmail').value;
+  const password = document.getElementById('registerPassword').value;
+  const confirmPassword = document.getElementById('registerConfirmPassword').value;
+  
+  if (!validateEmail(email)) {
+    alert('Please enter a valid email address');
+    return;
+  }
+  
+  if (password.length < 6) {
+    alert('Password must be at least 6 characters long');
+    return;
+  }
+  
+  if (password !== confirmPassword) {
+    alert('Passwords do not match');
+    return;
+  }
+  
+  try {
+    const response = await fetch('http://localhost:5000/api/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        fullName: fullName,
+        username: username,
+        email: email,
+        password: password
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      alert(data.error || 'Registration failed. Username or email may already exist.');
+      return;
+    }
+    
+    alert('Account created successfully! Please log in with your new credentials.');
+    document.getElementById('registerForm').reset();
+    toggleRegistration();
+    document.getElementById('loginEmail').value = email;
+    
+  } catch (error) {
+    console.error('Registration error:', error);
+    alert('An error occurred during registration. Please try again.');
+  }
+});
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  
+  if (!validateEmail(email)) {
+    alert('Please enter a valid email address');
+    return;
+  }
+  
+  try {
+    const result = await fetch('http://localhost:5000/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
+    
+    const data = await result.json();
+    
+    if (!result.ok) {
+      alert(data.error || 'Login failed');
+      return;
+    }
+    
+    sessionStorage.setItem('currentUser', JSON.stringify(data.user));
+    
+    if (Notification.permission === 'default') {
+      await Notification.requestPermission();
+    }
+    
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Wacky Workout Tracker', {
+        body: `Welcome back, ${data.user.username}!`,
+        tag: 'login'
+      });
+    }
+    
+    window.location.href = 'index.html';
+    
+  } catch (error) {
+    console.error('Login error:', error);
+    alert('An error occurred during login. Please try again.');
+  }
+});
+  </script>
+</body>
+</html>

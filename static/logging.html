@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log Workout - Wacky Workout Tracker</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-left">
+        <span class="flame-icon">🔥</span>
+        <h1 class="header-title">WACKY WORKOUT</h1>
+        <span class="flame-icon">🔥</span>
+      </div>
+      <div class="header-right">
+        <button onclick="toggleDarkMode()" class="btn-logout" style="margin-right: 1rem;">
+          <span>🌓</span>
+          Toggle Theme
+        </button>
+        <div class="streak-badge">
+          <div class="streak-number" id="streakNumber">...</div>
+          <div class="streak-label">Day Streak 🔥</div>
+        </div>
+        <button class="btn-logout" id="logoutBtn">
+          <span>↩️</span>
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <nav class="nav-tabs">
+      <a href="index.html" class="nav-tab">
+        <span>📊</span>
+        Dashboard
+      </a>
+      <a href="logging.html" class="nav-tab active">
+        <span>➕</span>
+        Log Workout
+      </a>
+      <a href="goals.html" class="nav-tab">
+        <span>🎯</span>
+        Goals
+      </a>
+      <a href="progress.html" class="nav-tab">
+        <span>📈</span>
+        Progress
+      </a>
+      <a href="about.html" class="nav-tab">
+        <span>👤</span>
+        About
+      </a>
+    </nav>
+
+    <main>
+      <div class="card">
+        <h2 class="card-title">Log Workout</h2>
+        
+        <form id="workoutForm">
+          <div class="form-group">
+            <label for="exercise-name">Exercise Name:</label>
+            <input type="text" id="exercise-name" name="exercise-name" placeholder="e.g., Push-ups, Squats" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Additional Exercises (Optional):</label>
+            <div id="exerciseFieldsContainer"></div>
+            <button type="button" onclick="addExerciseField()" class="btn btn-secondary" style="margin-top: 0.5rem;">+ Add Another Exercise</button>
+          </div>
+          
+          <div class="form-row">
+            <div>
+              <label for="sets">Sets:</label>
+              <input type="number" id="sets" name="sets" placeholder="Sets" min="1" required>
+            </div>
+            
+            <div>
+              <label for="reps">Reps:</label>
+              <input type="number" id="reps" name="reps" placeholder="Reps" min="1" required>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div>
+              <label for="duration">Duration (minutes):</label>
+              <input type="number" id="duration" name="duration" placeholder="Duration (min)" min="1" required>
+            </div>
+            
+            <div>
+              <label for="weight">Weight (lbs):</label>
+              <input type="number" id="weight" name="weight" placeholder="Weight (lbs)" min="0" value="0">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="workout-date">Workout Date:</label>
+            <input type="date" id="workout-date" name="workout-date" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Difficulty Level:</label>
+            <div class="radio-group">
+              <label><input type="radio" name="difficulty" value="easy" required> Easy</label>
+              <label><input type="radio" name="difficulty" value="moderate"> Moderate</label>
+              <label><input type="radio" name="difficulty" value="hard"> Hard</label>
+              <label><input type="radio" name="difficulty" value="extreme"> Extreme</label>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="workout-time">Time of Day:</label>
+            <input type="time" id="workout-time" name="workout-time">
+          </div>
+          
+          <div class="form-group">
+            <label for="notes">Workout Notes:</label>
+            <textarea id="notes" name="notes" placeholder="How did you feel? Any achievements or challenges?" rows="4" oninput="updateCharacterCount('notes', 'charCount')"></textarea>
+            <span id="charCount" style="color: #fca5a5; font-size: 0.875rem;">0 characters</span>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">LOG WORKOUT</button>
+        </form>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <h3>Contact Us</h3>
+        <p>Email: support@wackyworkout.com</p>
+        <p>Phone: (555) 123-4567</p>
+        <p>Address: 123 Fitness Street, Workout City, WC 12345</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    getStreak().then(streak => {
+      document.getElementById('streakNumber').textContent = streak;
+    });
+    
+    document.getElementById('workout-date').valueAsDate = new Date();
+
+    document.getElementById('workoutForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+      if (!currentUser) {
+        alert('Please log in to log workouts');
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      const formData = {
+        userId: currentUser.userId,
+        exerciseName: document.getElementById('exercise-name').value,
+        sets: parseInt(document.getElementById('sets').value),
+        reps: parseInt(document.getElementById('reps').value),
+        duration: parseInt(document.getElementById('duration').value),
+        weight: parseFloat(document.getElementById('weight').value),
+        workoutDate: document.getElementById('workout-date').value,
+        difficulty: document.querySelector('input[name="difficulty"]:checked')?.value || null,
+        workoutTime: document.getElementById('workout-time').value || null,
+        notes: document.getElementById('notes').value || null
+      };
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/workouts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+          alert(result.error || 'Failed to log workout');
+          return;
+        }
+        
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('Workout Logged! 💪', {
+            body: `${formData.exerciseName} has been added!`,
+            tag: 'workout'
+          });
+        }
+        
+        alert('Workout logged successfully!');
+        document.getElementById('workoutForm').reset();
+        document.getElementById('workout-date').valueAsDate = new Date();
+        window.location.href = 'index.html';
+        
+      } catch (error) {
+        console.error('Error logging workout:', error);
+        alert('An error occurred. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goals - Wacky Workout Tracker</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-left">
+        <span class="flame-icon">🔥</span>
+        <h1 class="header-title">WACKY WORKOUT</h1>
+        <span class="flame-icon">🔥</span>
+      </div>
+      <div class="header-right">
+        <button onclick="toggleDarkMode()" class="btn-logout" style="margin-right: 1rem;">
+          <span>🌓</span>
+          Toggle Theme
+        </button>
+        <div class="streak-badge">
+          <div class="streak-number" id="streakNumber">...</div>
+          <div class="streak-label">Day Streak 🔥</div>
+        </div>
+        <button class="btn-logout" id="logoutBtn">
+          <span>↩️</span>
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <nav class="nav-tabs">
+      <a href="index.html" class="nav-tab">
+        <span>📊</span>
+        Dashboard
+      </a>
+      <a href="logging.html" class="nav-tab">
+        <span>➕</span>
+        Log Workout
+      </a>
+      <a href="goals.html" class="nav-tab active">
+        <span>🎯</span>
+        Goals
+      </a>
+      <a href="progress.html" class="nav-tab">
+        <span>📈</span>
+        Progress
+      </a>
+      <a href="about.html" class="nav-tab">
+        <span>👤</span>
+        About
+      </a>
+    </nav>
+
+    <main>
+      <div class="card">
+        <h2 class="card-title">Create Goal</h2>
+        <form id="goalForm">
+          <div class="form-group">
+            <input type="text" id="goalName" placeholder="Goal name (e.g., 1000 Push-ups)" required>
+          </div>
+          <div class="form-group">
+            <input type="number" id="goalTarget" placeholder="Target number" required min="1">
+          </div>
+          <div class="form-group">
+            <input type="date" id="goalDeadline" required>
+          </div>
+          <button type="submit" class="btn btn-primary">CREATE GOAL</button>
+        </form>
+      </div>
+      
+      <div class="card">
+        <h2 class="card-title">Your Goals</h2>
+        <div id="goalsList">
+          
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <h3>Contact Us</h3>
+        <p>Email: support@wackyworkout.com</p>
+        <p>Phone: (555) 123-4567</p>
+        <p>Address: 123 Fitness Street, Workout City, WC 12345</p>
+      </div>
+    </footer>
+  </div>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="app.js"></script>
+<script>
+  
+  if (!requireAuth()) {
+    ;
+  }
+
+  
+  (async () => {
+  const streak = await getStreak();
+  document.getElementById('streakNumber').textContent = streak;
+})();
+
+  
+  document.getElementById('goalForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const user = getCurrentUser(); 
+    if (!user) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const goalData = {
+      userId: user.userId,
+      goalName: document.getElementById('goalName').value,
+      targetValue: parseInt(document.getElementById('goalTarget').value),
+      deadline: document.getElementById('goalDeadline').value || null
+    };
+
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/goals', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(goalData)
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        alert(result.error || 'Failed to create goal');
+        return;
+      }
+      
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Goal Created! 🎯', {
+          body: `"${goalData.goalName}" goal has been set!`,
+          tag: 'goal'
+        });
+      }
+      
+      alert('Goal created successfully!');
+      
+      document.getElementById('goalForm').reset();
+      
+      renderGoals();
+      
+    } catch (error) {
+      console.error('Error creating goal:', error);
+      alert('An error occurred. Please try again.');
+    }
+  });
+  
+  async function renderGoals() {
+    try {
+      const goals = await getGoals();
+      const goalsList = document.getElementById('goalsList');
+      
+      if (goals.length === 0) {
+        goalsList.innerHTML = '<p class="empty-state">No goals yet! Create your first goal above.</p>';
+      } else {
+        goalsList.innerHTML = goals.map(goal => {
+          const percentage = Math.min((goal.current_progress / goal.target_value) * 100, 100);
+          const completedClass = goal.is_completed ? 'goal-completed' : '';
+          
+          return `
+            <div class="goal-item ${completedClass}">
+              <div class="goal-header">
+                <div>
+                  <p class="goal-name">
+                    ${goal.is_completed ? '✅ ' : ''}${goal.goal_name}
+                    ${goal.is_completed ? ' (Completed!)' : ''}
+                  </p>
+                  <p class="goal-deadline">
+                    ${goal.deadline ? 'Deadline: ' + goal.deadline : 'No deadline set'}
+                  </p>
+                </div>
+                <div>
+                  <p class="goal-progress">${goal.current_progress}/${goal.target_value}</p>
+                  ${!goal.is_completed ? `
+                    <button class="icon-btn" onclick="deleteGoal(${goal.goal_id})" 
+                            style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.875rem;">
+                      🗑️ Delete
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill ${goal.is_completed ? 'progress-complete' : ''}" 
+                     style="width: ${percentage}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    } catch (error) {
+      console.error('Error rendering goals:', error);
+      document.getElementById('goalsList').innerHTML = 
+        '<p class="empty-state">Error loading goals. Please refresh the page.</p>';
+    }
+  }
+  
+  
+  async function deleteGoal(goalId) {
+    if (!confirm('Are you sure you want to delete this goal?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`http://localhost:5000/api/goals/${goalId}`, {
+        method: 'DELETE'
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        alert(result.error || 'Failed to delete goal');
+        return;
+      }
+      
+      alert('Goal deleted successfully!');
+ 
+      
+      renderGoals();
+      
+    } catch (error) {
+      console.error('Error deleting goal:', error);
+      alert('An error occurred. Please try again.');
+    }
+  }
+  
+  renderGoals();
+</script>
+</body>
+</html>
